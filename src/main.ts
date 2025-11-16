@@ -1,4 +1,10 @@
 import './style.css'
-import { getButtons } from './menu.ts'
+import { createMenu } from './menu.ts'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = await getButtons()
+function generateMainMenu() {
+    const { html, setup } = createMenu()
+    document.querySelector<HTMLDivElement>('#app')!.innerHTML = html
+    setup()
+}
+
+generateMainMenu()

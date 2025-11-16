@@ -1,10 +1,22 @@
 import { invoke } from '@tauri-apps/api/core'
-import type { Button } from './types'
 
-export async function getButtons(): Promise<string> {
-    const buttons: Button[] = await invoke('get_menu_buttons')
+export function createMenu(): { html: string, setup: () => void } {
+    const html = `
+    <div>
+        <button id="start-lesson">Start Lesson</button>
+        <button id="quit">Quit</button>
+    </div>
+    `
 
-    const mapped = buttons.map((button) => `<li><button id="${button.id}">${button.text}</button"></li>`)
+    const clickBindings = () => {
+        document.getElementById('quit')!.onclick = async () => {
+            await quit()
+        }
+    }
 
-    return `<ul>${mapped.join('')}</ul>`
+    return { html: html, setup: clickBindings }
+}
+
+async function quit() {
+    await invoke('exit_app')
 }
