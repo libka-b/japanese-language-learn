@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { getNextHiragana } from './hiragana_lesson'
 
 export function createMenu(): { html: string, setup: () => void } {
     const html = `
@@ -11,6 +12,11 @@ export function createMenu(): { html: string, setup: () => void } {
     const clickBindings = () => {
         document.getElementById('quit')!.onclick = async () => {
             await quit()
+        }
+
+        document.getElementById('start-lesson')!.onclick = async () => {
+            await invoke('set_counter', { stopAt: 50 })
+            await getNextHiragana()
         }
     }
 

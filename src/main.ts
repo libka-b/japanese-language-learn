@@ -1,9 +1,14 @@
 import './style.css'
 import { createMenu } from './menu.ts'
 
-function generateMainMenu() {
+export function getMainDivElement(): HTMLDivElement {
+    return document.querySelector<HTMLDivElement>('#app')!
+}
+
+export function generateMainMenu() {
     const { html, setup } = createMenu()
-    document.querySelector<HTMLDivElement>('#app')!.innerHTML = html
+    const mainDivElement = getMainDivElement()
+    mainDivElement.innerHTML = html
     setup()
 }
 
