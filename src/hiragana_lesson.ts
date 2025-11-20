@@ -36,9 +36,9 @@ export async function getNextHiragana() {
 async function onSubmit(entry: Entry) {
     const input = (document.getElementById('input') as HTMLInputElement).value
     const isCorrect = input === entry.english ? true : false
-    const message = isCorrect ? '✅ Correct!' : '❌ Incorrect!'
+    const message = isCorrect ? '✅ Correct!' : `❌ Incorrect! Should be '${entry.english}'`
     document.getElementById('result')!.innerHTML = message
 
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 500))
     await getNextHiragana()
 }

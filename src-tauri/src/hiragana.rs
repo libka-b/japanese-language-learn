@@ -1,19 +1,12 @@
-use std::sync::{OnceLock};
-use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
+use std::sync::{OnceLock, Mutex};
 use std::fs;
 use tauri::path::BaseDirectory;
-use rand::prelude::IndexedRandom;
 use tauri::Manager;
 use crate::counter::{COUNTER};
+use crate::entry_generator::{Entry, EntryGenerator};
 
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Entry {
-    japanese: String,
-    english: String,
-}
-
-static HIRAGANA: OnceLock<Vec<Entry>> = OnceLock::new();
+static HIRAGANA_GEN: OnceLock<Mutex<EntryGenerator>> = OnceLock::new();
 
 #[tauri::command]
 pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
@@ -27,18 +20,22 @@ pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
         return None;
     }
 
-    let hiragana = HIRAGANA.get_or_init(|| {
+    let hiragana = HIRAGANA_GEN.get_or_init(|| {
         let resource_path = handle.path()
             .resolve("resources/hiragana.json", BaseDirectory::Resource)
             .expect("Failed to resolve `resources/hiragana.json`.");
 
         let json_data = fs::read_to_string(resource_path).expect("Failed to read hiragana.json");
-        serde_json::from_str(&json_data).expect("Failed to parse JSON")
+        let entries: HashSet<Entry> = serde_json::from_str(&json_data).expect("Failed to parse JSON");
+        let generator = EntryGenerator::new(entries).expect("Failed to create EntryGenerator");
+        Mutex::new(generator)
     });
 
     if let Some(c) = counter.as_mut() {
         c.current += 1;
     }
 
-    Some(hiragana.choose(&mut rand::rng()).unwrap().clone())
+    let entry = hiragana.lock().unwrap().next();
+
+    Some(entry)
 }

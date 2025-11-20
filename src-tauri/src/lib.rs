@@ -1,6 +1,7 @@
 mod menu;
 mod hiragana;
 mod counter;
+mod entry_generator;
 
 pub use menu::{exit_app};
 pub use hiragana::{next_hiragana_entry};
