@@ -63,6 +63,35 @@ h1 {
   color: #888;
 }
 
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.success-bar {
+  height: 20px;
+  width: 300px;
+  display: flex;
+  cursor: pointer;
+}
+
+.details.hidden {
+  display: none;
+}
+
+.success {
+  background-color: green;
+}
+
+.fail {
+  background-color: yellow;
+}
+
+table {
+  margin: 0px auto;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

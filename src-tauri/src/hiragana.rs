@@ -5,8 +5,10 @@ use tauri::path::BaseDirectory;
 use tauri::Manager;
 use crate::counter::{COUNTER};
 use crate::entry_generator::{Entry, EntryGenerator};
+use crate::stats::{FrontendCompatibleStats, Stats};
 
 static HIRAGANA_GEN: OnceLock<Mutex<EntryGenerator>> = OnceLock::new();
+static STATS: OnceLock<Mutex<Stats>> = OnceLock::new();
 
 #[tauri::command]
 pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
@@ -38,4 +40,31 @@ pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
     let entry = hiragana.lock().unwrap().next();
 
     Some(entry)
+}
+
+#[tauri::command]
+pub fn add_correct() {
+    let stats = STATS.get_or_init(|| {
+        Mutex::new(Stats::new())
+    });
+
+    stats.lock().unwrap().add_correct();
+}
+
+#[tauri::command]
+pub fn add_incorrect(entry: Entry) {
+    let stats = STATS.get_or_init(|| {
+        Mutex::new(Stats::new())
+    });
+
+    stats.lock().unwrap().add_incorrect(entry);
+}
+
+#[tauri::command]
+pub fn get_stats() -> FrontendCompatibleStats {
+    let stats = STATS.get_or_init(|| {
+        Mutex::new(Stats::new())
+    });
+
+    FrontendCompatibleStats::from_stats(stats.lock().unwrap().clone())
 }

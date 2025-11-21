@@ -1,15 +1,12 @@
 import { invoke } from "@tauri-apps/api/core"
-import { generateMainMenu, getMainDivElement } from "./main"
-
-interface Entry {
-    readonly japanese: string
-    readonly english: string
-}
+import { getMainDivElement } from "./main"
+import { createMenu } from "./menu"
+import type { Entry } from "./types"
 
 export async function getNextHiragana() {
     const entry: Entry | undefined = await invoke('next_hiragana_entry')
     if (!entry) {
-        generateMainMenu()
+        createMenu()
         return
     }
 
@@ -38,6 +35,12 @@ async function onSubmit(entry: Entry) {
     const isCorrect = input === entry.english ? true : false
     const message = isCorrect ? '✅ Correct!' : `❌ Incorrect! Should be '${entry.english}'`
     document.getElementById('result')!.innerHTML = message
+
+    if (isCorrect) {
+        await invoke('add_correct')
+    } else {
+        await invoke('add_incorrect', { entry: { japanese: entry.japanese, english: entry.english} })
+    }
 
     await new Promise(resolve => setTimeout(resolve, 500))
     await getNextHiragana()
