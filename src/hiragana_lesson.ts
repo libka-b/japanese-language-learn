@@ -37,7 +37,7 @@ async function onSubmit(entry: Entry) {
     document.getElementById('result')!.innerHTML = message
 
     if (isCorrect) {
-        await invoke('add_correct')
+        await invoke('add_correct', { entry: { japanese: entry.japanese, english: entry.english } })
     } else {
         await invoke('add_incorrect', { entry: { japanese: entry.japanese, english: entry.english} })
     }

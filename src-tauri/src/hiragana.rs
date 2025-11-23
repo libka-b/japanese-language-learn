@@ -2,13 +2,13 @@ use std::collections::HashSet;
 use std::sync::{OnceLock, Mutex};
 use std::fs;
 use tauri::path::BaseDirectory;
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 use crate::counter::{COUNTER};
 use crate::entry_generator::{Entry, EntryGenerator};
-use crate::stats::{FrontendCompatibleStats, Stats};
+use crate::stats::{JsonCompatibleStats, Stats};
 
 static HIRAGANA_GEN: OnceLock<Mutex<EntryGenerator>> = OnceLock::new();
-static STATS: OnceLock<Mutex<Stats>> = OnceLock::new();
+pub static STATS: OnceLock<Mutex<Stats>> = OnceLock::new();
 
 #[tauri::command]
 pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
@@ -43,28 +43,35 @@ pub fn next_hiragana_entry(handle: tauri::AppHandle) -> Option<Entry> {
 }
 
 #[tauri::command]
-pub fn add_correct() {
+pub fn add_correct(handle: tauri::AppHandle, entry: Entry) {
     let stats = STATS.get_or_init(|| {
-        Mutex::new(Stats::new())
+        Mutex::new(create_stats(handle))
     });
 
-    stats.lock().unwrap().add_correct();
+    stats.lock().unwrap().add_correct(entry);
 }
 
 #[tauri::command]
-pub fn add_incorrect(entry: Entry) {
+pub fn add_incorrect(handle: tauri::AppHandle, entry: Entry) {
     let stats = STATS.get_or_init(|| {
-        Mutex::new(Stats::new())
+        Mutex::new(create_stats(handle))
     });
 
     stats.lock().unwrap().add_incorrect(entry);
 }
 
 #[tauri::command]
-pub fn get_stats() -> FrontendCompatibleStats {
+pub fn get_stats(handle: tauri::AppHandle) -> JsonCompatibleStats {
     let stats = STATS.get_or_init(|| {
-        Mutex::new(Stats::new())
+        Mutex::new(create_stats(handle))
     });
 
-    FrontendCompatibleStats::from_stats(stats.lock().unwrap().clone())
+    JsonCompatibleStats::from_stats(stats.lock().unwrap().clone())
+}
+
+pub fn create_stats(handle: tauri::AppHandle) -> Stats {
+    match JsonCompatibleStats::load_from_file(handle) {
+        Ok(json_stats) => json_stats.to_stats(),
+        Err(_) => Stats::new(),
+    }
 }
