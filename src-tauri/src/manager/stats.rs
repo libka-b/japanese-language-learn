@@ -1,10 +1,10 @@
 use std::{collections::HashMap, fs};
 use serde::{Serialize, Deserialize};
-use crate::entry_generator::Entry;
 use serde_json;
 use tauri::Manager;
 use tauri::path::BaseDirectory;
-
+use crate::manager::Entry;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct Stats {
@@ -48,10 +48,10 @@ impl JsonCompatibleStats {
         }
     }
 
-    pub fn save_to_file(&self, handle: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_to_file(&self, path: String, handle: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         let json = serde_json::to_string_pretty(self)?;
         let path = handle.path()
-            .resolve("stats.json", BaseDirectory::AppData)?;
+            .resolve(path, BaseDirectory::AppData)?;
 
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
@@ -63,9 +63,9 @@ impl JsonCompatibleStats {
         Ok(())
     }
 
-    pub fn load_from_file(handle: tauri::AppHandle) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load_from_file(path: PathBuf, handle: tauri::AppHandle) -> Result<Self, Box<dyn std::error::Error>> {
         let path = handle.path()
-            .resolve("stats.json", BaseDirectory::AppData)?;
+            .resolve(path, BaseDirectory::AppData)?;
         let json = fs::read_to_string(path)?;
         let stats: Self = serde_json::from_str(&json)?;
         Ok(stats)

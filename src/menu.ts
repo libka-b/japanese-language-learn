@@ -19,7 +19,6 @@ export function createMenu() {
     }
 
     document.getElementById('start-lesson')!.onclick = async () => {
-        await invoke('set_counter', { stopAt: 50 })
         await getNextHiragana()
     }
 
