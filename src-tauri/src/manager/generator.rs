@@ -25,15 +25,17 @@ impl Generator {
         let diff = self.wrong.difference(&self.returned).cloned().collect::<HashSet<_>>();
         if !diff.is_empty() {
             self.counter.incr();
-            self.returned.insert(diff.iter().next()?.clone());
-            return Some(diff.iter().next()?.clone())
+            let next = diff.iter().next()?.clone();
+            self.returned.insert(next.clone());
+            return Some(next)
         }
 
         let diff = self.entries.difference(&self.returned).cloned().collect::<HashSet<_>>();
         if !diff.is_empty() {
             self.counter.incr();
-            self.returned.insert(diff.iter().next()?.clone());
-            return Some(diff.iter().next()?.clone())
+            let next = diff.iter().next()?.clone();
+            self.returned.insert(next.clone());
+            return Some(next)
         }
 
         self.reset();

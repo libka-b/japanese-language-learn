@@ -74,7 +74,12 @@ impl Manager {
         let entries = load_entries(handle.clone());
         let stats = self.get_stats(handle);
         let wrong: HashSet<Entry> = stats.wrong.keys().cloned().collect();
-        let counter = Counter::new(entries.len() as u32);
+        let entries_len = entries.len();
+
+        // stop_at is computed as half of the total entries + % of mistakes done * total entries
+        // that means, the worst case scenario (100% mistakes) it will end up being 1.5 times the total entries
+        let stop_at = (entries_len as f64 / 2.0) + (stats.incorrect as f64 / stats.total as f64) * 100.0 * entries_len as f64;
+        let counter = Counter::new(stop_at as u32);
         Generator::new(entries, wrong, counter)
     }
 
