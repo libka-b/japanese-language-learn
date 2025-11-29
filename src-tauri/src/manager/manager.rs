@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use tauri::{AppHandle, Manager as TauriManager, path::BaseDirectory};
-use std::sync::Mutex;
 use std::fs;
 use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter};
 
@@ -8,65 +7,56 @@ const HIRAGANA_PATH: &str = "resources/hiragana.json";
 const HIRAGANA_STATS: &str = "stats.json";
 
 pub struct Manager {
-    stats: Mutex<Option<Stats>>,
-    generator: Mutex<Option<Generator>>,
+    stats: Option<Stats>,
+    generator: Option<Generator>,
 }
 
 impl Manager {
     pub fn new() -> Self {
         Self {
-            stats: Mutex::new(None),
-            generator: Mutex::new(None),
+            stats: None,
+            generator: None,
         }
     }
 
     pub fn get_next(&mut self, handle: AppHandle) -> Option<Entry> {
-        let mut generator = self.generator.lock().unwrap();
-        if generator.is_none() {
-            drop(generator);
-
-            let loaded_generator = self.load_generator(handle)
-                .expect("Unable to load generator.");
-            generator = self.generator.lock().unwrap();
-            *generator = Some(loaded_generator);
+        if self.generator.is_none() {
+            self.generator = Some(self.load_generator(handle).expect("Unable to load generator."))
         }
 
-        generator.as_mut().unwrap().next()
+        self.generator.as_mut().unwrap().next()
     }
 
     pub fn get_stats(&mut self, handle: AppHandle) -> Stats {
-        let mut stats = self.stats.lock().unwrap();
-        if stats.is_none() {
-            let loaded_stats = self.load_stats(handle);
-            *stats = Some(loaded_stats);
+        if self.stats.is_none() {
+            self.stats = Some(self.load_stats(handle));
         }
 
-        stats.as_ref().unwrap().clone()
+        self.stats.as_ref().unwrap().clone()
     }
 
     pub fn add_correct(&mut self, handle: AppHandle, entry: Entry) {
-        let mut stats = self.stats.lock().unwrap();
-        if stats.is_none() {
-            let loaded_stats = self.load_stats(handle);
-            *stats = Some(loaded_stats);
+        if self.stats.is_none() {
+            self.stats = Some(self.load_stats(handle));
         }
 
-        stats.as_mut().unwrap().add_correct(entry);
+        self.stats.as_mut().unwrap().add_correct(entry);
     }
 
     pub fn add_incorrect(&mut self, handle: AppHandle, entry: Entry) {
-        let mut stats = self.stats.lock().unwrap();
-        if stats.is_none() {
-            let loaded_stats = self.load_stats(handle);
-            *stats = Some(loaded_stats);
+        if self.stats.is_none() {
+            self.stats = Some(self.load_stats(handle));
         }
 
-        stats.as_mut().unwrap().add_incorrect(entry);
+        self.stats.as_mut().unwrap().add_incorrect(entry);
     }
 
     pub fn save_stats(&mut self, handle: AppHandle) {
-        let stats = self.stats.lock().unwrap().clone().unwrap();
-        let json_stats = JsonCompatibleStats::from_stats(stats);
+        if self.stats.is_none() {
+            self.stats = Some(self.load_stats(handle.clone()));
+        }
+
+        let json_stats = JsonCompatibleStats::from_stats(self.stats.as_ref().unwrap().clone());
         let _ = json_stats.save_to_file(HIRAGANA_STATS.to_string(), handle);
     }
 
