@@ -97,3 +97,37 @@ impl Stats {
         *self.wrong.entry(entry).or_insert(0) += 1
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_correct() {
+        let mut stats = Stats::new();
+        let entry = Entry {
+            japanese: "a".to_string(),
+            english: "a".to_string(),
+        };
+
+        stats.add_correct(entry);
+        assert_eq!(stats.total, 1);
+        assert_eq!(stats.incorrect, 0);
+        assert_eq!(stats.wrong.len(), 0);
+    }
+
+    #[test]
+    fn test_add_incorrect() {
+        let mut stats = Stats::new();
+        let entry = Entry {
+            japanese: "a".to_string(),
+            english: "a".to_string(),
+        };
+
+        stats.add_incorrect(entry.clone());
+        assert_eq!(stats.total, 1);
+        assert_eq!(stats.incorrect, 1);
+        assert_eq!(stats.wrong.len(), 1);
+        assert_eq!(stats.wrong.iter().next(), Some((&entry, &1)));
+    }
+}

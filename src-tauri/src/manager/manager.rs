@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use tauri::{AppHandle, Manager as TauriManager, path::BaseDirectory};
 use std::fs;
-use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter};
+use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter, EntryCounter};
 
 const HIRAGANA_PATH: &str = "resources/hiragana.json";
 const HIRAGANA_STATS: &str = "stats.json";
@@ -19,12 +19,18 @@ impl Manager {
         }
     }
 
-    pub fn get_next(&mut self, handle: AppHandle) -> Option<Entry> {
+    pub fn get_next(&mut self, handle: AppHandle) -> Option<EntryCounter> {
         if self.generator.is_none() {
             self.generator = Some(self.load_generator(handle).expect("Unable to load generator."))
         }
 
-        self.generator.as_mut().unwrap().next()
+        match self.generator.as_mut().unwrap().next() {
+            Some(entry) => Some(entry),
+            None => {
+                self.generator = None;
+                None
+            }
+        }
     }
 
     pub fn get_stats(&mut self, handle: AppHandle) -> Stats {
@@ -64,11 +70,9 @@ impl Manager {
         let entries = load_entries(handle.clone());
         let stats = self.get_stats(handle);
         let wrong: HashSet<Entry> = stats.wrong.keys().cloned().collect();
-        let entries_len = entries.len();
+        let entries_len = entries.len() as u32;
 
-        // stop_at is computed as half of the total entries + % of mistakes done * total entries
-        // that means, the worst case scenario (100% mistakes) it will end up being 1.5 times the total entries
-        let stop_at = (entries_len as f64 / 2.0) + (stats.incorrect as f64 / stats.total as f64) * 100.0 * entries_len as f64;
+        let stop_at = compute_stop_at(entries_len, stats);
         let counter = Counter::new(stop_at as u32);
         Generator::new(entries, wrong, counter)
     }
@@ -85,6 +89,17 @@ impl Manager {
 
         json_stats.to_stats()
     }
+}
+
+// stop_at is computed as half of the total entries + % of mistakes done * total entries
+// that means, the worst case scenario (100% mistakes) it will end up being 1.5 times the total entries
+fn compute_stop_at(entries_len: u32, stats: Stats) -> u32 {
+    let base = entries_len as f32 / 2.0;
+    let extra = match stats.total {
+        0 => 0.0,
+        _ => (stats.incorrect as f32 / stats.total as f32) * 100.0 * entries_len as f32,
+    };
+    (base + extra) as u32
 }
 
 fn load_entries(handle: AppHandle) -> HashSet<Entry> {

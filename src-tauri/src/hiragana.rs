@@ -1,9 +1,9 @@
 use tauri::{AppHandle, State};
 use crate::AppState;
-use crate::manager::{Entry, JsonCompatibleStats};
+use crate::manager::{EntryCounter, Entry, JsonCompatibleStats};
 
 #[tauri::command]
-pub fn next_hiragana_entry(handle: AppHandle, app_state: State<AppState>) -> Option<Entry> {
+pub fn next_hiragana_entry(handle: AppHandle, app_state: State<AppState>) -> Option<EntryCounter> {
     app_state.manager.lock().unwrap().get_next(handle)
 }
 

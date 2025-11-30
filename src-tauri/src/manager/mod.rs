@@ -9,3 +9,4 @@ pub use stats::{Stats, JsonCompatibleStats};
 pub use manager::Manager;
 use counter::Counter;
 use generator::Generator;
+pub use generator::EntryCounter;

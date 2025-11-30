@@ -1,17 +1,21 @@
 import { invoke } from "@tauri-apps/api/core"
 import { getMainDivElement } from "./main"
 import { createMenu } from "./menu"
-import type { Entry } from "./types"
+import type { EntryCounter, Entry } from "./types"
 
 export async function getNextHiragana() {
-    const entry: Entry | undefined = await invoke('next_hiragana_entry')
-    if (!entry) {
+    const entryCounter: EntryCounter | undefined = await invoke('next_hiragana_entry')
+    if (!entryCounter) {
         createMenu()
         return
     }
 
+    const counter = entryCounter.counter
+    const entry = entryCounter.entry
+
     const html = `
     <h1>${entry.japanese}</h1>
+    <h3>Exercise ${counter.current} out of ${counter.stop_at}</h3>
     <form id="form">
         <input type="text" id="input" placeholder="English transcript" autocomplete="off">
         <button type="button" id="submit">Submit</button>
