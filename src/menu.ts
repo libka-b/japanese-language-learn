@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
-import { getNextHiragana } from './hiragana_lesson'
 import { getMainDivElement } from './main'
 import { showStats } from './stats'
+import { createLessonMenu } from './lesson_menu'
 
 export function createMenu() {
     const html = `
@@ -19,7 +19,7 @@ export function createMenu() {
     }
 
     document.getElementById('start-lesson')!.onclick = async () => {
-        await getNextHiragana()
+        await createLessonMenu()
     }
 
     document.getElementById('quit')!.onclick = async () => {

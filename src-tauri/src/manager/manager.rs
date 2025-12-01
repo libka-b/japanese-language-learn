@@ -3,17 +3,18 @@ use tauri::{AppHandle, Manager as TauriManager, path::BaseDirectory};
 use std::fs;
 use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter, EntryCounter};
 
-const HIRAGANA_PATH: &str = "resources/hiragana.json";
-const HIRAGANA_STATS: &str = "stats.json";
-
 pub struct Manager {
+    resource_path: String,
+    stats_path: String,
     stats: Option<Stats>,
     generator: Option<Generator>,
 }
 
 impl Manager {
-    pub fn new() -> Self {
+    pub fn new(resource_path: String, stats_path: String) -> Self {
         Self {
+            resource_path,
+            stats_path,
             stats: None,
             generator: None,
         }
@@ -58,16 +59,14 @@ impl Manager {
     }
 
     pub fn save_stats(&mut self, handle: AppHandle) {
-        if self.stats.is_none() {
-            self.stats = Some(self.load_stats(handle.clone()));
+        if self.stats.is_some() {
+            let json_stats = JsonCompatibleStats::from_stats(self.stats.as_ref().unwrap().clone());
+            let _ = json_stats.save_to_file(self.stats_path.to_string(), handle);
         }
-
-        let json_stats = JsonCompatibleStats::from_stats(self.stats.as_ref().unwrap().clone());
-        let _ = json_stats.save_to_file(HIRAGANA_STATS.to_string(), handle);
     }
 
     fn load_generator(&mut self, handle: AppHandle) -> Result<Generator, String> {
-        let entries = load_entries(handle.clone());
+        let entries = self.load_entries(handle.clone());
         let stats = self.get_stats(handle);
         let wrong: HashSet<Entry> = stats.wrong.keys().cloned().collect();
         let entries_len = entries.len() as u32;
@@ -79,8 +78,8 @@ impl Manager {
 
     fn load_stats(&self, handle: AppHandle) -> Stats {
         let stats_path = handle.path()
-            .resolve(HIRAGANA_STATS, BaseDirectory::AppData)
-            .expect(&format!("Unable to resolve stats path: `{}`.", HIRAGANA_STATS));
+            .resolve(&self.stats_path, BaseDirectory::AppData)
+            .expect(&format!("Unable to resolve stats path: `{}`.", self.stats_path));
 
         let json_stats = JsonCompatibleStats::load_from_file(stats_path, handle)
             .unwrap_or_else(|_| {
@@ -88,6 +87,17 @@ impl Manager {
             });
 
         json_stats.to_stats()
+    }
+
+    fn load_entries(&self, handle: AppHandle) -> HashSet<Entry> {
+        let resource_path = handle.path()
+            .resolve(&self.resource_path, BaseDirectory::Resource)
+            .expect(&format!("Unable to resolve resource path `{}`.", self.resource_path));
+
+        let json_data = fs::read_to_string(&resource_path)
+            .expect(&format!("Unable to read data from `{}`.", resource_path.display()));
+
+        serde_json::from_str(&json_data).expect(&format!("Unable to parse data from `{}`.", json_data))
     }
 }
 
@@ -100,15 +110,4 @@ fn compute_stop_at(entries_len: u32, stats: Stats) -> u32 {
         _ => (stats.incorrect as f32 / stats.total as f32) * 100.0 * entries_len as f32,
     };
     (base + extra) as u32
-}
-
-fn load_entries(handle: AppHandle) -> HashSet<Entry> {
-    let resource_path = handle.path()
-        .resolve(HIRAGANA_PATH, BaseDirectory::Resource)
-        .expect(&format!("Unable to resolve resource path `{}`.", HIRAGANA_PATH));
-
-    let json_data = fs::read_to_string(&resource_path)
-        .expect(&format!("Unable to read data from `{}`.", resource_path.display()));
-
-    serde_json::from_str(&json_data).expect(&format!("Unable to parse data from `{}`.", json_data))
 }

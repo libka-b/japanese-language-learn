@@ -1,22 +1,22 @@
 mod manager;
-mod hiragana;
+mod lesson;
 
 use std::sync::Mutex;
-use hiragana::{next_hiragana_entry, add_correct, add_incorrect, get_stats, exit_app};
-use manager::Manager;
+use lesson::{next_lesson_entry, add_correct, add_incorrect, get_stats, exit_app};
+use manager::Router;
 
 pub struct AppState {
-  manager: Mutex<Manager>,
+  manager: Mutex<Router>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_process::init())
-    .manage(AppState { manager: Mutex::new(Manager::new()) })
+    .manage(AppState { manager: Mutex::new(Router::new()) })
     .invoke_handler(tauri::generate_handler![
       exit_app,
-      next_hiragana_entry,
+      next_lesson_entry,
       add_correct,
       add_incorrect,
       get_stats,

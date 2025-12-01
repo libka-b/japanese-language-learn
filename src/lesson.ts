@@ -3,8 +3,8 @@ import { getMainDivElement } from "./main"
 import { createMenu } from "./menu"
 import type { EntryCounter, Entry } from "./types"
 
-export async function getNextHiragana() {
-    const entryCounter: EntryCounter | undefined = await invoke('next_hiragana_entry')
+export async function getNextExercise(lessonName: string) {
+    const entryCounter: EntryCounter | undefined = await invoke('next_lesson_entry', { lessonName: lessonName })
     if (!entryCounter) {
         createMenu()
         return
@@ -26,26 +26,26 @@ export async function getNextHiragana() {
     const mainDivElement = getMainDivElement()
     mainDivElement.innerHTML = html
 
-    document.getElementById('submit')!.onclick = async () => { await onSubmit(entry) }
+    document.getElementById('submit')!.onclick = async () => { await onSubmit(lessonName, entry) }
     document.getElementById('form')!.addEventListener('submit', async (event) => {
         event.preventDefault()
-        await onSubmit(entry)
+        await onSubmit(lessonName, entry)
     })
     document.getElementById('input')?.focus()
 }
 
-async function onSubmit(entry: Entry) {
+async function onSubmit(lessonName: string, entry: Entry) {
     const input = (document.getElementById('input') as HTMLInputElement).value
     const isCorrect = input === entry.english ? true : false
     const message = isCorrect ? '✅ Correct!' : `❌ Incorrect! Should be '${entry.english}'`
     document.getElementById('result')!.innerHTML = message
 
     if (isCorrect) {
-        await invoke('add_correct', { entry: { japanese: entry.japanese, english: entry.english } })
+        await invoke('add_correct', { entry: { japanese: entry.japanese, english: entry.english }, lessonName: lessonName })
     } else {
-        await invoke('add_incorrect', { entry: { japanese: entry.japanese, english: entry.english} })
+        await invoke('add_incorrect', { entry: { japanese: entry.japanese, english: entry.english }, lessonName: lessonName })
     }
 
     await new Promise(resolve => setTimeout(resolve, 500))
-    await getNextHiragana()
+    await getNextExercise(lessonName)
 }

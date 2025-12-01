@@ -28,6 +28,11 @@
     "icon": [
       "icons/icon.ico"
     ],
-    "resources": ["resources/hiragana.json"]
+    "resources": [
+      "resources/hiragana.json",
+      "resources/hiragana-plus.json",
+      "resources/katakana.json",
+      "resources/katakana-plus.json"
+    ]
   }
 }
