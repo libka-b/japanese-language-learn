@@ -107,7 +107,37 @@ fn compute_stop_at(entries_len: u32, stats: Stats) -> u32 {
     let base = entries_len as f32 / 2.0;
     let extra = match stats.total {
         0 => 0.0,
-        _ => (stats.incorrect as f32 / stats.total as f32) * 100.0 * entries_len as f32,
+        _ => (stats.incorrect as f32 / stats.total as f32) * entries_len as f32,
     };
     (base + extra) as u32
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_compute_stop_at_empty_stats() {
+        let stats = Stats {
+            total: 0,
+            incorrect: 0,
+            wrong: HashMap::new(),
+        };
+        let entries_len = 100;
+        let stop_at = compute_stop_at(entries_len, stats);
+        assert_eq!(stop_at, 50);
+    }
+
+    #[test]
+    fn test_compute_stop_at_some_stats() {
+        let stats = Stats {
+            total: 10,
+            incorrect: 5,
+            wrong: HashMap::new(),
+        };
+        let entries_len = 100;
+        let stop_at = compute_stop_at(entries_len, stats);
+        assert_eq!(stop_at, 100);
+    }
 }
