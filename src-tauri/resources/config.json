@@ -1,0 +1,31 @@
+{
+  "lesson_order": [
+    "hiragana",
+    "hiragana-plus",
+    "katakana",
+    "katakana-plus",
+    "hiragana-vocabulary"
+  ],
+  "lesson_map": {
+    "hiragana": {
+      "name": "hiragana",
+      "path": "resources/hiragana.json"
+    },
+    "hiragana-plus": {
+      "name": "hiragana-plus",
+      "path": "resources/hiragana-plus.json"
+    },
+    "katakana": {
+      "name": "katakana",
+      "path": "resources/katakana.json"
+    },
+    "katakana-plus": {
+      "name": "katakana-plus",
+      "path": "resources/katakana-plus.json"
+    },
+    "hiragana-vocabulary": {
+      "name": "hiragana-vocabulary",
+      "path": "resources/hiragana-vocabulary.json"
+    }
+  }
+}

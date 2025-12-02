@@ -29,10 +29,12 @@
       "icons/icon.ico"
     ],
     "resources": [
+      "resources/config.json",
       "resources/hiragana.json",
       "resources/hiragana-plus.json",
       "resources/katakana.json",
-      "resources/katakana-plus.json"
+      "resources/katakana-plus.json",
+      "resources/hiragana-vocabulary.json"
     ]
   }
 }

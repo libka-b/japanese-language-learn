@@ -1,42 +1,23 @@
 use std::collections::HashMap;
-use crate::manager::{Manager, Entry, EntryCounter, Stats};
+use crate::manager::{Config, Entry, EntryCounter, Manager, Stats};
 use tauri::AppHandle;
-
-const HIRAGANA_PATH: &str = "resources/hiragana.json";
-const HIRAGANA_STATS: &str = "hiragana-stats.json";
-
-const HIRAGANA_PLUS_PATH: &str = "resources/hiragana-plus.json";
-const HIRAGANA_PLUS_STATS: &str = "hiragana-plus-stats.json";
-
-const KATAKANA_PATH: &str = "resources/katakana.json";
-const KATAKANA_STATS: &str = "katakana-stats.json";
-
-const KATAKANA_PLUS_PATH: &str = "resources/katakana-plus.json";
-const KATAKANA_PLUS_STATS: &str = "katakana-plus-stats.json";
 
 pub struct Router {
     manager_map: HashMap<String, Manager>,
 }
 
 impl Router {
-    pub fn new() -> Self {
+    pub fn new(config: Config) -> Self {
         let mut map = HashMap::new();
-        map.insert(
-            "hiragana".to_string(),
-            Manager::new(HIRAGANA_PATH.to_string(), HIRAGANA_STATS.to_string()),
-        );
-        map.insert(
-            "hiragana-plus".to_string(),
-            Manager::new(HIRAGANA_PLUS_PATH.to_string(), HIRAGANA_PLUS_STATS.to_string()),
-        );
-        map.insert(
-            "katakana".to_string(),
-            Manager::new(KATAKANA_PATH.to_string(), KATAKANA_STATS.to_string()),
-        );
-        map.insert(
-            "katakana-plus".to_string(),
-            Manager::new(KATAKANA_PLUS_PATH.to_string(), KATAKANA_PLUS_STATS.to_string()),
-        );
+        config.lesson_map.values().for_each(|lesson_config| {
+            map.insert(
+                lesson_config.name.to_string(),
+                Manager::new(
+                    lesson_config.path.to_string(),
+                    lesson_config.stats_path(),
+                ),
+            );
+        });
 
         Self { manager_map: map }
     }

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { getMainDivElement } from './main'
+import { configManager, getMainDivElement } from './main'
 import { showStats } from './stats'
 import { createLessonMenu } from './lesson_menu'
 
@@ -15,11 +15,11 @@ export function createMenu() {
     getMainDivElement().innerHTML = html
 
     document.getElementById('view-stats')!.onclick = async () => {
-        await showStats()
+        await showStats(configManager)
     }
 
     document.getElementById('start-lesson')!.onclick = async () => {
-        await createLessonMenu()
+        await createLessonMenu(configManager)
     }
 
     document.getElementById('quit')!.onclick = async () => {

@@ -1,0 +1,74 @@
+[
+    {
+        "japanese": "おはよう",
+        "english": "ohayou"
+    },
+    {
+        "japanese": "おはようございます",
+        "english": "ohayougoyaimasu"
+    },
+    {
+        "japanese": "こんにいちは",
+        "english": "konnichiwa"
+    },
+    {
+        "japanese": "こんばんは",
+        "english": "konbanwa"
+    },
+    {
+        "japanese": "さようなら",
+        "english": "sayounara"
+    },
+    {
+        "japanese": "おやすみ",
+        "english": "oyasumi"
+    },
+    {
+        "japanese": "ありがとう",
+        "english": "arigatou"
+    },
+    {
+        "japanese": "ありがとうございます",
+        "english": "arigatougozaimasu"
+    },
+    {
+        "japanese": "すみません",
+        "english": "sumimasen"
+    },
+    {
+        "japanese": "いいえ",
+        "english": "iie"
+    },
+    {
+        "japanese": "いってきます",
+        "english": "ittekimasu"
+    },
+    {
+        "japanese": "いってらっしゃい",
+        "english": "itterasshai"
+    },
+    {
+        "japanese": "ただいま",
+        "english": "tadaima"
+    },
+    {
+        "japanese": "おかえりなさい",
+        "english": "okaerinasai"
+    },
+    {
+        "japanese": "いただきます",
+        "english": "itadakimasu"
+    },
+    {
+        "japanese": "ごちそうさまでした",
+        "english": "gochisousamadeshita"
+    },
+    {
+        "japanese": "はじめまして",
+        "english": "hajimemashite"
+    },
+    {
+        "japanese": "よろしくおねがいします",
+        "english": "yoroshikuonegaishimasu"
+    }
+]

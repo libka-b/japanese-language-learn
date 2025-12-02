@@ -1,37 +1,33 @@
 import { getNextExercise } from './lesson'
 import { getMainDivElement } from './main'
 import { createMenu } from './menu'
+import { ConfigManager } from './config_manager'
 
-export async function createLessonMenu() {
+export async function createLessonMenu(configManager: ConfigManager) {
+    const lessonButtons = configManager.getLessonOrder().map(lessonName => {
+        return `<button id="${lessonName}">${capitalize(lessonName)} lesson</button>`
+    }).join('')
+
     const html = `
     <div class="menu">
-        <button id="hiragana-lesson">Hiragana lesson</button>
-        <button id="hiragana-plus-lesson">Hiragana Plus lesson</button>
-        <button id="katakana-lesson">Katakana lesson</button>
-        <button id="katakana-plus-lesson">Katakana Plus lesson</button>
+        ${lessonButtons}
         <button id="main-menu">Back to main menu</button>
     </div>
     `
 
     getMainDivElement().innerHTML = html
 
-    document.getElementById('hiragana-lesson')!.onclick = async () => {
-        await getNextExercise('hiragana')
-    }
-
-    document.getElementById('hiragana-plus-lesson')!.onclick = async () => {
-        await getNextExercise('hiragana-plus')
-    }
-
-    document.getElementById('katakana-lesson')!.onclick = async () => {
-        await getNextExercise('katakana')
-    }
-
-    document.getElementById('katakana-plus-lesson')!.onclick = async () => {
-        await getNextExercise('katakana-plus')
-    }
+    configManager.getLessonOrder().forEach(lessonName => {
+        document.getElementById(lessonName)!.onclick = async () => {
+            await getNextExercise(lessonName)
+        }
+    })
 
     document.getElementById('main-menu')!.onclick = async () => {
         await createMenu()
     }
+}
+
+function capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1)
 }
