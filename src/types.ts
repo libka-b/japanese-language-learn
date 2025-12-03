@@ -23,3 +23,19 @@ export interface Stats {
     readonly incorrect: number
     readonly wrong: EntryCount[]
 }
+
+export interface LessonConfig {
+    readonly name: string
+    readonly path: string
+}
+
+export interface LessonGroup {
+    readonly name: string
+    readonly lesson_map: Record<string, LessonConfig>
+    readonly lesson_order: Array<string>
+}
+
+export interface Config {
+    readonly group_map: Record<string, LessonGroup>
+    readonly group_order: Array<string>
+}

@@ -31,7 +31,9 @@ pub fn run() {
 
       let app_state = AppState {
         config: config.clone(),
-        manager: Mutex::new(Router::new(config)),
+        manager: Mutex::new(Router::new(config).unwrap_or_else(|err| {
+          panic!("Unable to instantiate router. Error: {}", err);
+        })),
       };
       app.manage(app_state);
 

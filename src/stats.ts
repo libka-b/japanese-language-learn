@@ -2,12 +2,11 @@ import { invoke } from '@tauri-apps/api/core'
 import type { Stats } from './types'
 import { createMenu } from './menu'
 import { getMainDivElement } from './main'
-import type { ConfigManager } from './config_manager'
 
-export async function showStats(configManager: ConfigManager) {
+export async function showStats(lessonOrder: Array<string>) {
     const namedStats: Record<string, Stats> = await invoke('get_stats')
 
-    let html = configManager.getLessonOrder().map(lessonName => {
+    let html = lessonOrder.map(lessonName => {
         const stats = namedStats[lessonName]
         const success = (1 - (stats.incorrect / stats.total)) * 100
         const fail = stats.incorrect / stats.total * 100

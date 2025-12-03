@@ -1,31 +1,47 @@
 {
-  "lesson_order": [
+  "group_order": [
     "hiragana",
-    "hiragana-plus",
-    "katakana",
-    "katakana-plus",
-    "hiragana-vocabulary"
+    "katakana"
   ],
-  "lesson_map": {
+  "group_map": {
     "hiragana": {
       "name": "hiragana",
-      "path": "resources/hiragana.json"
-    },
-    "hiragana-plus": {
-      "name": "hiragana-plus",
-      "path": "resources/hiragana-plus.json"
+      "lesson_order": [
+        "hiragana",
+        "hiragana-plus",
+        "hiragana-vocabulary"
+      ],
+      "lesson_map": {
+        "hiragana": {
+          "name": "hiragana",
+          "path": "resources/hiragana.json"
+        },
+        "hiragana-plus": {
+          "name": "hiragana-plus",
+          "path": "resources/hiragana-plus.json"
+        },
+        "hiragana-vocabulary": {
+          "name": "hiragana-vocabulary",
+          "path": "resources/hiragana-vocabulary.json"
+        }
+      }
     },
     "katakana": {
       "name": "katakana",
-      "path": "resources/katakana.json"
-    },
-    "katakana-plus": {
-      "name": "katakana-plus",
-      "path": "resources/katakana-plus.json"
-    },
-    "hiragana-vocabulary": {
-      "name": "hiragana-vocabulary",
-      "path": "resources/hiragana-vocabulary.json"
+      "lesson_order": [
+        "katakana",
+        "katakana-plus"
+      ],
+      "lesson_map": {
+        "katakana": {
+          "name": "katakana",
+          "path": "resources/katakana.json"
+        },
+        "katakana-plus": {
+          "name": "katakana-plus",
+          "path": "resources/katakana-plus.json"
+        }
+      }
     }
   }
 }

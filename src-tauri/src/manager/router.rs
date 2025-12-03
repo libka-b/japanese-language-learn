@@ -7,19 +7,24 @@ pub struct Router {
 }
 
 impl Router {
-    pub fn new(config: Config) -> Self {
+    pub fn new(config: Config) -> Result<Self, String> {
         let mut map = HashMap::new();
-        config.lesson_map.values().for_each(|lesson_config| {
-            map.insert(
-                lesson_config.name.to_string(),
-                Manager::new(
-                    lesson_config.path.to_string(),
-                    lesson_config.stats_path(),
-                ),
-            );
-        });
+        for lesson_group in config.group_map.values() {
+            for lesson_config in lesson_group.lesson_map.values() {
+                if map.contains_key(&lesson_config.name) {
+                    return Err(format!("Lesson name `{}` already exists.", lesson_config.name))
+                }
+                map.insert(
+                    lesson_config.name.to_string(),
+                    Manager::new(
+                        lesson_config.path.to_string(),
+                        lesson_config.stats_path(),
+                    ),
+                );
+            }
+        }
 
-        Self { manager_map: map }
+        Ok(Self { manager_map: map })
     }
 
     pub fn get_next(&mut self, handle: AppHandle, name: &str) -> Option<EntryCounter> {

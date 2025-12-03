@@ -1,11 +1,14 @@
+import type { Config } from './types'
+
 export class ConfigManager {
-    private lessonOrder: Array<string>
+    private config: Config
 
-    constructor(lessonOrder: Array<string>) {
-        this.lessonOrder = lessonOrder
+    constructor(config: Config) {
+        this.config = config
     }
 
-    getLessonOrder(): Array<string> {
-        return this.lessonOrder
-    }
+    getGroupOrder = () => this.config.group_order
+    getLessonOrder = (groupName: string) => this.config
+        .group_map[groupName]
+        .lesson_order
 }

@@ -14,7 +14,14 @@ impl LessonConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Config {
-    pub lesson_order: Vec<String>,
+pub struct LessonGroup {
+    pub name: String,
     pub lesson_map: HashMap<String, LessonConfig>,
+    pub lesson_order: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Config {
+    pub group_order: Vec<String>,
+    pub group_map: HashMap<String, LessonGroup>,
 }
