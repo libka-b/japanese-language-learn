@@ -1,6 +1,6 @@
 use std::collections::HashSet;
+use csv::Reader;
 use tauri::{AppHandle, Manager as TauriManager, path::BaseDirectory};
-use std::fs;
 use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter, EntryCounter};
 
 pub struct Manager {
@@ -94,10 +94,14 @@ impl Manager {
             .resolve(&self.resource_path, BaseDirectory::Resource)
             .expect(&format!("Unable to resolve resource path `{}`.", self.resource_path));
 
-        let json_data = fs::read_to_string(&resource_path)
-            .expect(&format!("Unable to read data from `{}`.", resource_path.display()));
+        let mut reader = Reader::from_path(resource_path)
+            .expect("Unable tp read CSV file");
 
-        serde_json::from_str(&json_data).expect(&format!("Unable to parse data from `{}`.", json_data))
+        let records: Vec<Entry> = reader.deserialize()
+            .filter_map(Result::ok)
+            .collect();
+
+        records.into_iter().collect()
     }
 }
 

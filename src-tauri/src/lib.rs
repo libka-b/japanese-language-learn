@@ -20,13 +20,13 @@ pub fn run() {
     .setup(|app| {
       let app_handle = app.handle();
       let config_path = app_handle.path()
-        .resolve("resources/config.json", tauri::path::BaseDirectory::Resource)
+        .resolve("resources/config.yaml", tauri::path::BaseDirectory::Resource)
         .expect("Unable to resolve config path");
 
-      let json = std::fs::read_to_string(config_path)
+      let content = std::fs::read_to_string(config_path)
         .expect("Unable to read config file");
 
-      let config: Config = serde_json::from_str(&json)
+      let config: Config = serde_yaml::from_str(&content)
         .expect("Unable to parse config.");
 
       let app_state = AppState {

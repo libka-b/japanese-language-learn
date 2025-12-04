@@ -1,0 +1,32 @@
+group_order:
+  - hiragana
+  - katakana
+group_map:
+  hiragana:
+    name: hiragana
+    lesson_order:
+      - hiragana
+      - hiragana-plus
+      - hiragana-vocabulary
+    lesson_map:
+      hiragana:
+        name: hiragana
+        path: resources/hiragana.csv
+      hiragana-plus:
+        name: hiragana-plus
+        path: resources/hiragana-plus.csv
+      hiragana-vocabulary:
+        name: hiragana-vocabulary
+        path: resources/hiragana-vocabulary.csv
+  katakana:
+    name: katakana
+    lesson_order:
+      - katakana
+      - katakana-plus
+    lesson_map:
+      katakana:
+        name: katakana
+        path: resources/katakana.csv
+      katakana-plus:
+        name: katakana-plus
+        path: resources/katakana-plus.csv
