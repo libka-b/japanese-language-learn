@@ -1,7 +1,7 @@
-use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
-use crate::manager::{Entry, Counter};
+use crate::manager::{Counter, Entry};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EntryCounter {
@@ -17,11 +17,20 @@ pub struct Generator {
 }
 
 impl Generator {
-    pub fn new(entries: HashSet<Entry>, wrong: HashSet<Entry>, counter: Counter) -> Result<Self, String> {
+    pub fn new(
+        entries: HashSet<Entry>,
+        wrong: HashSet<Entry>,
+        counter: Counter,
+    ) -> Result<Self, String> {
         if entries.is_empty() {
             Err("Provided empty `entries` collection!".to_string())
         } else {
-            Ok(Self { entries, wrong, returned: HashSet::new(), counter })
+            Ok(Self {
+                entries,
+                wrong,
+                returned: HashSet::new(),
+                counter,
+            })
         }
     }
 
@@ -30,20 +39,34 @@ impl Generator {
             return None;
         }
 
-        let diff = self.wrong.difference(&self.returned).cloned().collect::<HashSet<_>>();
+        let diff = self
+            .wrong
+            .difference(&self.returned)
+            .cloned()
+            .collect::<HashSet<_>>();
         if !diff.is_empty() {
             self.counter.incr();
             let next = diff.iter().next()?.clone();
             self.returned.insert(next.clone());
-            return Some(EntryCounter { entry: next, counter: self.counter.clone() })
+            return Some(EntryCounter {
+                entry: next,
+                counter: self.counter.clone(),
+            });
         }
 
-        let diff = self.entries.difference(&self.returned).cloned().collect::<HashSet<_>>();
+        let diff = self
+            .entries
+            .difference(&self.returned)
+            .cloned()
+            .collect::<HashSet<_>>();
         if !diff.is_empty() {
             self.counter.incr();
             let next = diff.iter().next()?.clone();
             self.returned.insert(next.clone());
-            return Some(EntryCounter { entry: next, counter: self.counter.clone() })
+            return Some(EntryCounter {
+                entry: next,
+                counter: self.counter.clone(),
+            });
         }
 
         self.reset();
@@ -61,11 +84,7 @@ mod tests {
 
     #[test]
     fn test_generator_empty_entries() {
-        let generator = Generator::new(
-            HashSet::new(),
-            HashSet::new(),
-            Counter::new(1),
-        );
+        let generator = Generator::new(HashSet::new(), HashSet::new(), Counter::new(1));
         assert!(generator.is_err());
     }
 

@@ -1,7 +1,7 @@
-use std::collections::HashSet;
+use crate::manager::{Counter, Entry, EntryCounter, Generator, JsonCompatibleStats, Stats};
 use csv::Reader;
-use tauri::{AppHandle, Manager as TauriManager, path::BaseDirectory};
-use crate::manager::{Generator, Stats, Entry, JsonCompatibleStats, Counter, EntryCounter};
+use std::collections::HashSet;
+use tauri::{path::BaseDirectory, AppHandle, Manager as TauriManager};
 
 pub struct Manager {
     resource_path: String,
@@ -22,7 +22,10 @@ impl Manager {
 
     pub fn get_next(&mut self, handle: AppHandle) -> Option<EntryCounter> {
         if self.generator.is_none() {
-            self.generator = Some(self.load_generator(handle).expect("Unable to load generator."))
+            self.generator = Some(
+                self.load_generator(handle)
+                    .expect("Unable to load generator."),
+            )
         }
 
         match self.generator.as_mut().unwrap().next() {
@@ -72,34 +75,33 @@ impl Manager {
         let entries_len = entries.len() as u32;
 
         let stop_at = compute_stop_at(entries_len, stats);
-        let counter = Counter::new(stop_at as u32);
+        let counter = Counter::new(stop_at);
         Generator::new(entries, wrong, counter)
     }
 
     fn load_stats(&self, handle: AppHandle) -> Stats {
-        let stats_path = handle.path()
+        let stats_path = handle
+            .path()
             .resolve(&self.stats_path, BaseDirectory::AppData)
-            .expect(&format!("Unable to resolve stats path: `{}`.", self.stats_path));
+            .unwrap_or_else(|_| panic!("Unable to resolve stats path: `{}`.", self.stats_path));
 
         let json_stats = JsonCompatibleStats::load_from_file(stats_path, handle)
-            .unwrap_or_else(|_| {
-                JsonCompatibleStats::from_stats(Stats::new())
-            });
+            .unwrap_or_else(|_| JsonCompatibleStats::from_stats(Stats::new()));
 
         json_stats.to_stats()
     }
 
     fn load_entries(&self, handle: AppHandle) -> HashSet<Entry> {
-        let resource_path = handle.path()
+        let resource_path = handle
+            .path()
             .resolve(&self.resource_path, BaseDirectory::Resource)
-            .expect(&format!("Unable to resolve resource path `{}`.", self.resource_path));
+            .unwrap_or_else(|_| {
+                panic!("Unable to resolve resource path `{}`.", self.resource_path)
+            });
 
-        let mut reader = Reader::from_path(resource_path)
-            .expect("Unable tp read CSV file");
+        let mut reader = Reader::from_path(resource_path).expect("Unable tp read CSV file");
 
-        let records: Vec<Entry> = reader.deserialize()
-            .filter_map(Result::ok)
-            .collect();
+        let records: Vec<Entry> = reader.deserialize().filter_map(Result::ok).collect();
 
         records.into_iter().collect()
     }

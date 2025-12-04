@@ -1,16 +1,18 @@
-mod stats;
-mod manager;
-mod generator;
+mod config;
 mod counter;
 mod entry;
+mod generator;
 mod router;
-mod config;
+mod stats;
 
-pub use entry::Entry;
-pub use stats::{Stats, JsonCompatibleStats};
-pub use manager::Manager;
-use counter::Counter;
-use generator::Generator;
-pub use generator::EntryCounter;
-pub use router::Router;
+#[allow(clippy::module_inception)]
+mod manager;
+
 pub use config::Config;
+use counter::Counter;
+pub use entry::Entry;
+pub use generator::EntryCounter;
+use generator::Generator;
+pub use manager::Manager;
+pub use router::Router;
+pub use stats::{JsonCompatibleStats, Stats};

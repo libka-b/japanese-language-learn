@@ -8,7 +8,10 @@ pub struct Counter {
 
 impl Counter {
     pub fn new(stop_at: u32) -> Self {
-        Self { current: 0, stop_at }
+        Self {
+            current: 0,
+            stop_at,
+        }
     }
 
     pub fn incr(&mut self) {

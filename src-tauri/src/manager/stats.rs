@@ -1,10 +1,9 @@
-use std::{collections::HashMap, fs};
-use serde::{Serialize, Deserialize};
-use serde_json;
-use tauri::Manager;
-use tauri::path::BaseDirectory;
 use crate::manager::Entry;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use std::{collections::HashMap, fs};
+use tauri::path::BaseDirectory;
+use tauri::Manager;
 
 #[derive(Debug, Clone)]
 pub struct Stats {
@@ -31,9 +30,14 @@ impl JsonCompatibleStats {
         Self {
             total: stats.total,
             incorrect: stats.incorrect,
-            wrong: stats.wrong.iter()
+            wrong: stats
+                .wrong
+                .iter()
                 .filter(|(_, count)| **count > 0)
-                .map(|(entry, count)| EntryCount { entry: entry.clone(), count: *count })
+                .map(|(entry, count)| EntryCount {
+                    entry: entry.clone(),
+                    count: *count,
+                })
                 .collect(),
         }
     }
@@ -42,30 +46,37 @@ impl JsonCompatibleStats {
         Stats {
             total: self.total,
             incorrect: self.incorrect,
-            wrong: self.wrong.iter()
+            wrong: self
+                .wrong
+                .iter()
                 .map(|ec| (ec.entry.clone(), ec.count))
                 .collect(),
         }
     }
 
-    pub fn save_to_file(&self, path: String, handle: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_to_file(
+        &self,
+        path: String,
+        handle: tauri::AppHandle,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let json = serde_json::to_string_pretty(self)?;
-        let path = handle.path()
-            .resolve(path, BaseDirectory::AppData)?;
+        let path = handle.path().resolve(path, BaseDirectory::AppData)?;
 
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
         }
 
-        if let Err(_) = fs::write(&path, json) {
-            return Err(format!("Unable to write to file {}.", path.display()).into())
+        if fs::write(&path, json).is_err() {
+            return Err(format!("Unable to write to file {}.", path.display()).into());
         };
         Ok(())
     }
 
-    pub fn load_from_file(path: PathBuf, handle: tauri::AppHandle) -> Result<Self, Box<dyn std::error::Error>> {
-        let path = handle.path()
-            .resolve(path, BaseDirectory::AppData)?;
+    pub fn load_from_file(
+        path: PathBuf,
+        handle: tauri::AppHandle,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let path = handle.path().resolve(path, BaseDirectory::AppData)?;
         let json = fs::read_to_string(path)?;
         let stats: Self = serde_json::from_str(&json)?;
         Ok(stats)
@@ -82,12 +93,11 @@ impl Stats {
     }
 
     pub fn add_correct(&mut self, entry: Entry) {
-        self.wrong.entry(entry)
-            .and_modify(|value| {
-                if *value > 0 {
-                    *value -= 1;
-                }
-            });
+        self.wrong.entry(entry).and_modify(|value| {
+            if *value > 0 {
+                *value -= 1;
+            }
+        });
         self.total += 1;
     }
 
