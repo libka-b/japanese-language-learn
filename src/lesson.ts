@@ -1,10 +1,13 @@
-import { invoke } from "@tauri-apps/api/core"
-import { getMainDivElement } from "./main"
-import { createMenu } from "./menu"
-import type { EntryCounter, Entry } from "./types"
+import { invoke } from '@tauri-apps/api/core'
+import { getMainDivElement } from './main'
+import { createMenu } from './menu'
+import type { EntryCounter, Entry } from './types'
 
-export async function getNextExercise(lessonName: string) {
-    const entryCounter: EntryCounter | undefined = await invoke('next_lesson_entry', { lessonName: lessonName })
+export async function getNextExercise(lessonName: string): Promise<void> {
+    const entryCounter: EntryCounter | undefined = await invoke(
+        'next_lesson_entry',
+        { lessonName: lessonName },
+    )
     if (!entryCounter) {
         createMenu()
         return
@@ -26,26 +29,38 @@ export async function getNextExercise(lessonName: string) {
     const mainDivElement = getMainDivElement()
     mainDivElement.innerHTML = html
 
-    document.getElementById('submit')!.onclick = async () => { await onSubmit(lessonName, entry) }
-    document.getElementById('form')!.addEventListener('submit', async (event) => {
-        event.preventDefault()
+    document.getElementById('submit')!.onclick = async (): Promise<void> => {
         await onSubmit(lessonName, entry)
-    })
+    }
+    document
+        .getElementById('form')!
+        .addEventListener('submit', async (event): Promise<void> => {
+            event.preventDefault()
+            await onSubmit(lessonName, entry)
+        })
     document.getElementById('input')?.focus()
 }
 
-async function onSubmit(lessonName: string, entry: Entry) {
+async function onSubmit(lessonName: string, entry: Entry): Promise<void> {
     const input = (document.getElementById('input') as HTMLInputElement).value
     const isCorrect = input === entry.english ? true : false
-    const message = isCorrect ? '✅ Correct!' : `❌ Incorrect! Should be '${entry.english}'`
+    const message = isCorrect
+        ? '✅ Correct!'
+        : `❌ Incorrect! Should be '${entry.english}'`
     document.getElementById('result')!.innerHTML = message
 
     if (isCorrect) {
-        await invoke('add_correct', { entry: { japanese: entry.japanese, english: entry.english }, lessonName: lessonName })
+        await invoke('add_correct', {
+            entry: { japanese: entry.japanese, english: entry.english },
+            lessonName: lessonName,
+        })
     } else {
-        await invoke('add_incorrect', { entry: { japanese: entry.japanese, english: entry.english }, lessonName: lessonName })
+        await invoke('add_incorrect', {
+            entry: { japanese: entry.japanese, english: entry.english },
+            lessonName: lessonName,
+        })
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     await getNextExercise(lessonName)
 }

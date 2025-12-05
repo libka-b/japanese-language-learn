@@ -3,7 +3,7 @@ import { configManager, getMainDivElement } from './main'
 import { showStats } from './stats'
 import { createGroupMenu, createLessonMenu } from './lesson_menu'
 
-export function createMenu() {
+export function createMenu(): void {
     const html = `
     <div class="menu">
         <button id="lessons">Go to lessons</button>
@@ -14,19 +14,20 @@ export function createMenu() {
 
     getMainDivElement().innerHTML = html
 
-    document.getElementById('view-stats')!.onclick = async () => {
-        await createGroupMenu(configManager, showStats)
-    }
+    document.getElementById('view-stats')!.onclick =
+        async (): Promise<void> => {
+            await createGroupMenu(configManager, showStats)
+        }
 
-    document.getElementById('lessons')!.onclick = async () => {
+    document.getElementById('lessons')!.onclick = async (): Promise<void> => {
         await createGroupMenu(configManager, createLessonMenu)
     }
 
-    document.getElementById('quit')!.onclick = async () => {
+    document.getElementById('quit')!.onclick = async (): Promise<void> => {
         await quit()
     }
 }
 
-async function quit() {
+async function quit(): Promise<void> {
     await invoke('exit_app')
 }

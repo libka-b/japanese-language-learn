@@ -1,20 +1,27 @@
 {
-  "name": "jlearn",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "rm -rf ./dist && tsc && vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.9.4",
-    "typescript": "~5.9.3",
-    "vite": "^7.2.2"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.9.0",
-    "@tauri-apps/plugin-process": "^2.3.1"
-  }
+    "name": "jlearn",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "lint": "eslint . --ext .ts,.tsx",
+        "format": "prettier --write .",
+        "dev": "vite",
+        "build": "npm run lint && npm run format && rm -rf ./dist && tsc && vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@tauri-apps/cli": "^2.9.4",
+        "typescript": "~5.9.3",
+        "vite": "^7.2.2"
+    },
+    "dependencies": {
+        "@tauri-apps/api": "^2.9.0",
+        "@tauri-apps/plugin-process": "^2.3.1",
+        "@types/node": "^24.10.1",
+        "@typescript-eslint/eslint-plugin": "^8.48.1",
+        "@typescript-eslint/parser": "^8.48.1",
+        "eslint": "^9.39.1",
+        "prettier": "^3.7.4"
+    }
 }

@@ -3,18 +3,23 @@ import type { Stats } from './types'
 import { createMenu } from './menu'
 import { getMainDivElement } from './main'
 
-export async function showStats(lessonOrder: Array<string>) {
+export async function showStats(lessonOrder: Array<string>): Promise<void> {
     const namedStats: Record<string, Stats> = await invoke('get_stats')
 
-    let html = lessonOrder.map(lessonName => {
-        const stats = namedStats[lessonName]
-        const success = (1 - (stats.incorrect / stats.total)) * 100
-        const fail = stats.incorrect / stats.total * 100
-        const sortedWrongs = stats.wrong.sort((a, b) => b.count - a.count)
-            .map(entry => `<tr><th>${entry.entry.japanese}</th><th>${entry.count}</th></tr>`)
-            .join('')
+    let html = lessonOrder
+        .map((lessonName) => {
+            const stats = namedStats[lessonName]
+            const success = (1 - stats.incorrect / stats.total) * 100
+            const fail = (stats.incorrect / stats.total) * 100
+            const sortedWrongs = stats.wrong
+                .sort((a, b) => b.count - a.count)
+                .map(
+                    (entry) =>
+                        `<tr><th>${entry.entry.japanese}</th><th>${entry.count}</th></tr>`,
+                )
+                .join('')
 
-        return `
+            return `
             <h2>${lessonName} statistics</h2>
             Success rate: ${success}%
             <div class="success-bar">
@@ -31,16 +36,17 @@ export async function showStats(lessonOrder: Array<string>) {
                 </table>
             </div>
         `
-    }).join('')
+        })
+        .join('')
 
     html += `<button id="main-menu">Back to Main Menu</button>`
 
     getMainDivElement().innerHTML = html
 
-    document.getElementById('main-menu')!.onclick = () => createMenu()
+    document.getElementById('main-menu')!.onclick = (): void => createMenu()
 
-    document.querySelectorAll('.success-bar').forEach(bar => {
-        bar.addEventListener('click', function() {
+    document.querySelectorAll('.success-bar').forEach((bar) => {
+        bar.addEventListener('click', function () {
             bar.nextElementSibling?.classList.toggle('hidden')
         })
     })

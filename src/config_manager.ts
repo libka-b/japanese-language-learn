@@ -7,8 +7,7 @@ export class ConfigManager {
         this.config = config
     }
 
-    getGroupOrder = () => this.config.group_order
-    getLessonOrder = (groupName: string) => this.config
-        .group_map[groupName]
-        .lesson_order
+    getGroupOrder = (): Array<string> => this.config.group_order
+    getLessonOrder = (groupName: string): Array<string> =>
+        this.config.group_map[groupName].lesson_order
 }

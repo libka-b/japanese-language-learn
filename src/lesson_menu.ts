@@ -6,10 +6,13 @@ import { ConfigManager } from './config_manager'
 export async function createGroupMenu(
     configManager: ConfigManager,
     callback: (lessonOrder: Array<string>) => Promise<void>,
-) {
-    const groupButtons = configManager.getGroupOrder().map(groupName => {
-        return `<button id="${groupName}">${capitalize(groupName)} group</button>`
-    }).join('')
+): Promise<void> {
+    const groupButtons = configManager
+        .getGroupOrder()
+        .map((groupName) => {
+            return `<button id="${groupName}">${capitalize(groupName)} group</button>`
+        })
+        .join('')
 
     const html = `
     <div class="menu">
@@ -20,21 +23,26 @@ export async function createGroupMenu(
 
     getMainDivElement().innerHTML = html
 
-    configManager.getGroupOrder().forEach(groupName => {
-        document.getElementById(groupName)!.onclick = async () => {
-            await callback(configManager.getLessonOrder(groupName))
-        }
+    configManager.getGroupOrder().forEach((groupName) => {
+        document.getElementById(groupName)!.onclick =
+            async (): Promise<void> => {
+                await callback(configManager.getLessonOrder(groupName))
+            }
     })
 
-    document.getElementById('main-menu')!.onclick = async () => {
+    document.getElementById('main-menu')!.onclick = async (): Promise<void> => {
         await createMenu()
     }
 }
 
-export async function createLessonMenu(lessonOrder: Array<string>) {
-    const lessonButtons = lessonOrder.map(lessonName => {
-        return `<button id="${lessonName}">${capitalize(lessonName)} lesson</button>`
-    }).join('')
+export async function createLessonMenu(
+    lessonOrder: Array<string>,
+): Promise<void> {
+    const lessonButtons = lessonOrder
+        .map((lessonName) => {
+            return `<button id="${lessonName}">${capitalize(lessonName)} lesson</button>`
+        })
+        .join('')
 
     const html = `
     <div class="menu">
@@ -45,13 +53,14 @@ export async function createLessonMenu(lessonOrder: Array<string>) {
 
     getMainDivElement().innerHTML = html
 
-    lessonOrder.forEach(lessonName => {
-        document.getElementById(lessonName)!.onclick = async () => {
-            await getNextExercise(lessonName)
-        }
+    lessonOrder.forEach((lessonName) => {
+        document.getElementById(lessonName)!.onclick =
+            async (): Promise<void> => {
+                await getNextExercise(lessonName)
+            }
     })
 
-    document.getElementById('main-menu')!.onclick = async () => {
+    document.getElementById('main-menu')!.onclick = async (): Promise<void> => {
         await createMenu()
     }
 }
