@@ -2,6 +2,7 @@ import { getNextExercise } from './lesson'
 import { getMainDivElement } from './main'
 import { createMenu } from './menu'
 import { ConfigManager } from './config_manager'
+import { generateLesson } from './agentic_lesson'
 
 export async function createGroupMenu(
     configManager: ConfigManager,
@@ -16,12 +17,18 @@ export async function createGroupMenu(
 
     const html = `
     <div class="menu">
+        <button id="agentic-lesson">Agentic Lesson</button>
         ${groupButtons}
         <button id="main-menu">Back to main menu</button>
     </div>
     `
 
     getMainDivElement().innerHTML = html
+
+    document.getElementById('agentic-lesson')!.onclick =
+        async (): Promise<void> => {
+            await generateLesson()
+        }
 
     configManager.getGroupOrder().forEach((groupName) => {
         document.getElementById(groupName)!.onclick =

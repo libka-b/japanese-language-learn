@@ -39,3 +39,7 @@ export interface Config {
     readonly group_map: Record<string, LessonGroup>
     readonly group_order: Array<string>
 }
+
+export interface AgenticLesson {
+    readonly japanese_text: string
+}

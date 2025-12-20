@@ -1,3 +1,4 @@
+use crate::agent::{LessonData, query_gemini};
 use crate::manager::{Entry, EntryCounter, JsonCompatibleStats};
 use crate::AppState;
 use std::collections::HashMap;
@@ -14,6 +15,11 @@ pub fn next_lesson_entry(
         .lock()
         .unwrap()
         .get_next(handle, lesson_name)
+}
+
+#[tauri::command]
+pub fn generate_agentic_lesson() -> LessonData {
+    query_gemini().unwrap()
 }
 
 #[tauri::command]
