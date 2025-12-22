@@ -4,7 +4,15 @@ mod lesson;
 mod manager;
 
 use config::get_config;
-use lesson::{add_correct, add_incorrect, exit_app, get_stats, next_lesson_entry, generate_agentic_lesson};
+use lesson::{
+    add_correct,
+    add_incorrect,
+    exit_app,
+    get_stats,
+    next_lesson_entry,
+    generate_agentic_lesson,
+    validate_translation_lesson,
+};
 use manager::{Config, Router};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -44,6 +52,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             generate_agentic_lesson,
+            validate_translation_lesson,
             exit_app,
             next_lesson_entry,
             add_correct,

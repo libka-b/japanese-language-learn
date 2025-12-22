@@ -43,3 +43,12 @@ export interface Config {
 export interface AgenticLesson {
     readonly japanese_text: string
 }
+
+export interface Translation {
+    readonly original_text: string
+    readonly translation: string
+    readonly correction: string
+    readonly mistakes: string
+    readonly suggestions: string
+    readonly mark: number
+}

@@ -1,4 +1,4 @@
-use crate::agent::{LessonData, query_gemini};
+use crate::agent::{LessonData, Translation, generate_lesson, validate_translation};
 use crate::manager::{Entry, EntryCounter, JsonCompatibleStats};
 use crate::AppState;
 use std::collections::HashMap;
@@ -19,7 +19,12 @@ pub fn next_lesson_entry(
 
 #[tauri::command]
 pub fn generate_agentic_lesson() -> LessonData {
-    query_gemini().unwrap()
+    generate_lesson().unwrap()
+}
+
+#[tauri::command]
+pub fn validate_translation_lesson(original: String, translation: String) -> Translation {
+    validate_translation(original, translation).unwrap()
 }
 
 #[tauri::command]

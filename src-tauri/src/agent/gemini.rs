@@ -1,21 +1,19 @@
+use serde::de::DeserializeOwned;
 use crate::agent::request::{Content, GeminiRequest, Part, SystemInstruction, GenerationConfig, ResponseSchema};
 use crate::agent::response::GeminiResponse;
-use serde::{Deserialize, Serialize};
 use std::env;
+use crate::agent::types::GeminiSchema;
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct LessonData {
-    pub japanese_text: String,
-    pub difficulty: String,
-}
-
-pub fn query_gemini() -> Result<LessonData, Box<dyn std::error::Error>> {
+pub fn query_gemini<T: GeminiSchema + DeserializeOwned>(
+    prompt: String,
+    system_instruction: String,
+) -> Result<T, Box<dyn std::error::Error>> {
     let request = GeminiRequest {
         contents: vec![
             Content {
                 parts: vec![
                     Part {
-                        text: "Generate simple text in hiragana for user to translate.".to_string(),
+                        text: prompt,
                     },
                 ],
             },
@@ -23,12 +21,7 @@ pub fn query_gemini() -> Result<LessonData, Box<dyn std::error::Error>> {
         system_instruction: SystemInstruction {
             parts: vec![
                 Part {
-                    text: r#"You are an AI agent called from application meant for learning Japanese. 
-                    Your task is to generate Japanese text for users to translate and then, 
-                    given both the original text and translation, evaluate the translation and 
-                    provide pointers, explain mistakes and suggest ways to improve. 
-                    Generate text without any control characters or diacritics so that it is easy for 
-                    users to read."#.to_string(),
+                    text: system_instruction,
                 },
             ],
         },
@@ -36,17 +29,8 @@ pub fn query_gemini() -> Result<LessonData, Box<dyn std::error::Error>> {
             response_mime_type: "application/json".to_string(),
             response_schema: ResponseSchema {
                 schema_type: "object".to_string(),
-                properties: serde_json::json!({
-                    "japanese_text": {
-                        "type": "string",
-                        "description": "Japanese text in hiragana"
-                    },
-                    "difficulty": {
-                        "type": "string",
-                        "description": "Difficulty level"
-                    }
-                }).as_object().unwrap().clone(),
-                required: vec!["japanese_text".to_string()],
+                properties: T::get_gemini_schema(),
+                required: T::get_gemini_required(),
             },
         },
     };

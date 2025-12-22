@@ -1,0 +1,30 @@
+use crate::agent::gemini::query_gemini;
+use crate::agent::types::{LessonData, Translation};
+
+const SYSTEM_INSTRUCTION: &str = r#"You are an AI agent called from application meant for learning Japanese. 
+Your task is to generate Japanese text for users to translate and then, 
+given both the original text and translation, evaluate the translation and 
+provide pointers, explain mistakes and suggest ways to improve. 
+Generate text without any control characters or diacritics so that it is easy for 
+users to read."#;
+
+pub fn generate_lesson() -> Result<LessonData, Box<dyn std::error::Error>> {
+    query_gemini(
+        "Generate simple text in hiragana for user to translate.".to_string(),
+        SYSTEM_INSTRUCTION.to_string(),
+    )
+}
+
+pub fn validate_translation(original: String, translation: String) -> Result<Translation, Box<dyn std::error::Error>> {
+    query_gemini(
+        format!(
+            "This is the original generated japanese text: '{original}'. 
+            This is the user provided english translation: '{translation}'. 
+            Validate the translation and if it's wrong, provide correct 
+            translation of the original text and pointers for the user to improve.",
+            original = original,
+            translation = translation,
+        ),
+        SYSTEM_INSTRUCTION.to_string(),
+    )
+}
