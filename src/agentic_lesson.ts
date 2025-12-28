@@ -2,8 +2,43 @@ import { invoke } from '@tauri-apps/api/core'
 import type { AgenticLesson, Translation } from './types'
 import { createMenu } from './menu'
 
+export async function renderSetApiKeyPage(): Promise<void> {
+    const html = `
+    <h1>Set Gemini API Key</h1>
+    <form id="form">
+        <input type="text" id="input" placeholder="API Key" autocomplete="off">
+        <button type="button" id="submit">Submit</button>
+    </form>
+    `
+
+    const mainDivElement = document.querySelector<HTMLDivElement>('#app')!
+    mainDivElement.innerHTML = html
+
+    document.getElementById('submit')!.onclick = async (): Promise<void> => {
+        await setApiKey()
+        await createMenu()
+    }
+    document
+        .getElementById('form')!
+        .addEventListener('submit', async (event): Promise<void> => {
+            event.preventDefault()
+            await setApiKey()
+            await createMenu()
+        })
+}
+
+async function setApiKey(): Promise<void> {
+    const key = (document.getElementById('input') as HTMLInputElement).value
+    await invoke('set_api_key', { key: key })
+}
+
 export async function generateLesson(): Promise<void> {
-    const agenticLesson: AgenticLesson = await invoke('generate_agentic_lesson')
+    let agenticLesson: AgenticLesson
+    try {
+        agenticLesson = await invoke('generate_agentic_lesson')
+    } catch {
+        return renderSetApiKeyPage()
+    }
 
     const html = `
     <h1>${agenticLesson.japanese_text}</h1>

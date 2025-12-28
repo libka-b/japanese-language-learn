@@ -1,5 +1,6 @@
 use rand::seq::IndexedRandom;
 use rand::rng;
+use crate::agent::ApiKey;
 use crate::agent::gemini::query_gemini;
 use crate::agent::types::{LessonData, Translation};
 
@@ -23,16 +24,18 @@ const TOPICS: &[&str] = &[
     "technology",
 ];
 
-pub fn generate_lesson() -> Result<LessonData, Box<dyn std::error::Error>> {
+pub fn generate_lesson(api_key: ApiKey) -> Result<LessonData, Box<dyn std::error::Error>> {
     let topic = TOPICS.choose(&mut rng()).unwrap();
     query_gemini(
+        api_key,
         format!("Generate simple text in hiragana for user to translate. The text should be about ${}", topic),
         SYSTEM_INSTRUCTION.to_string(),
     )
 }
 
-pub fn validate_translation(original: String, translation: String) -> Result<Translation, Box<dyn std::error::Error>> {
+pub fn validate_translation(original: String, translation: String, api_key: ApiKey) -> Result<Translation, Box<dyn std::error::Error>> {
     query_gemini(
+        api_key,
         format!(
             "This is the original generated japanese text: '{original}'. 
             This is the user provided english translation: '{translation}'. 

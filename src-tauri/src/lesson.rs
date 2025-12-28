@@ -1,4 +1,4 @@
-use crate::agent::{LessonData, Translation, generate_lesson, validate_translation};
+use crate::agent::{ApiKeyError, LessonData, Translation, generate_lesson, validate_translation};
 use crate::manager::{Entry, EntryCounter, JsonCompatibleStats};
 use crate::AppState;
 use std::collections::HashMap;
@@ -18,13 +18,27 @@ pub fn next_lesson_entry(
 }
 
 #[tauri::command]
-pub fn generate_agentic_lesson() -> LessonData {
-    generate_lesson().unwrap()
+pub fn generate_agentic_lesson(handle: AppHandle, app_state: State<AppState>) -> Result<LessonData, ApiKeyError> {
+    let api_key = app_state.get_api_key(handle)?;
+
+    Ok(generate_lesson(api_key).unwrap())
 }
 
 #[tauri::command]
-pub fn validate_translation_lesson(original: String, translation: String) -> Translation {
-    validate_translation(original, translation).unwrap()
+pub fn validate_translation_lesson(
+    handle: AppHandle,
+    app_state: State<AppState>,
+    original: String,
+    translation: String,
+) -> Result<Translation, ApiKeyError> {
+    let api_key = app_state.get_api_key(handle)?;
+
+    Ok(validate_translation(original, translation, api_key).unwrap())
+}
+
+#[tauri::command]
+pub fn set_api_key(app_state: State<AppState>, key: String) {
+    app_state.set_api_key(key)
 }
 
 #[tauri::command]
@@ -67,7 +81,11 @@ pub fn get_stats(
 
 #[tauri::command]
 pub fn exit_app(app_handle: tauri::AppHandle, app_state: State<AppState>) {
-    app_state.manager.lock().unwrap().save_stats(app_handle);
+    app_state.manager.lock().unwrap().save_stats(app_handle.clone());
+    match app_state.api_key.read().unwrap().as_ref() {
+        Some(key) => key.save_key(app_handle).unwrap(),
+        None => {},
+    }
 
     std::process::exit(0);
 }

@@ -1,10 +1,11 @@
 use serde::de::DeserializeOwned;
+use crate::agent::ApiKey;
 use crate::agent::request::{Content, GeminiRequest, Part, SystemInstruction, GenerationConfig, ResponseSchema};
 use crate::agent::response::GeminiResponse;
-use std::env;
 use crate::agent::types::GeminiSchema;
 
 pub fn query_gemini<T: GeminiSchema + DeserializeOwned>(
+    api_key: ApiKey,
     prompt: String,
     system_instruction: String,
 ) -> Result<T, Box<dyn std::error::Error>> {
@@ -40,7 +41,7 @@ pub fn query_gemini<T: GeminiSchema + DeserializeOwned>(
     let response = reqwest::blocking::Client::new()
         .post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent")
         .header("Content-Type", "application/json")
-        .header("x-goog-api-key", env::var("GEMINI_API_KEY").unwrap())
+        .header("x-goog-api-key", api_key.key)
         .body(body)
         .send()?;
 

@@ -3,6 +3,7 @@ mod config;
 mod lesson;
 mod manager;
 
+use agent::{ApiKey, ApiKeyError};
 use config::get_config;
 use lesson::{
     add_correct,
@@ -12,14 +13,46 @@ use lesson::{
     next_lesson_entry,
     generate_agentic_lesson,
     validate_translation_lesson,
+    set_api_key,
 };
 use manager::{Config, Router};
-use std::sync::Mutex;
+use std::sync::{Mutex, RwLock};
 use tauri::Manager;
 
 pub struct AppState {
     config: Config,
     manager: Mutex<Router>,
+    api_key: RwLock<Option<ApiKey>>,
+}
+
+impl AppState {
+    pub fn get_api_key(&self, handle: tauri::AppHandle) -> Result<ApiKey, ApiKeyError> {
+        {
+            let read_guard = self.api_key.read().unwrap();
+            if let Some(key) = read_guard.as_ref() {
+                return Ok(key.clone());
+            }
+        }
+
+        let mut write_guard = self.api_key.write().unwrap();
+
+        if let Some(key) = write_guard.as_mut() {
+            return Ok(key.clone());
+        }
+
+        match ApiKey::load_key(handle) {
+            Ok(key) => {
+                *write_guard = Some(key.clone());
+                Ok(key)
+            }
+            Err(_) => Err(ApiKeyError::ApiKeyNotSet),
+        }
+    }
+
+    pub fn set_api_key(&self, key: String) {
+        let mut write_guard = self.api_key.write().unwrap();
+        *write_guard = Some(ApiKey::new(key));
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -45,6 +78,7 @@ pub fn run() {
                 manager: Mutex::new(Router::new(config).unwrap_or_else(|err| {
                     panic!("Unable to instantiate router. Error: {}", err);
                 })),
+                api_key: RwLock::new(None),
             };
             app.manage(app_state);
 
@@ -59,6 +93,7 @@ pub fn run() {
             add_incorrect,
             get_stats,
             get_config,
+            set_api_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
