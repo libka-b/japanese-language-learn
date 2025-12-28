@@ -1,3 +1,5 @@
+use rand::seq::IndexedRandom;
+use rand::rng;
 use crate::agent::gemini::query_gemini;
 use crate::agent::types::{LessonData, Translation};
 
@@ -8,9 +10,23 @@ provide pointers, explain mistakes and suggest ways to improve.
 Generate text without any control characters or diacritics so that it is easy for 
 users to read."#;
 
+const TOPICS: &[&str] = &[
+    "commuting",
+    "shopping",
+    "restaurant",
+    "weather",
+    "workplace",
+    "doctor",
+    "hobby",
+    "traveling",
+    "friends",
+    "technology",
+];
+
 pub fn generate_lesson() -> Result<LessonData, Box<dyn std::error::Error>> {
+    let topic = TOPICS.choose(&mut rng()).unwrap();
     query_gemini(
-        "Generate simple text in hiragana for user to translate.".to_string(),
+        format!("Generate simple text in hiragana for user to translate. The text should be about ${}", topic),
         SYSTEM_INSTRUCTION.to_string(),
     )
 }
