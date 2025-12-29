@@ -1,7 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
-import { getMainDivElement } from './main'
 import { createMenu } from './menu'
 import type { EntryCounter, Entry } from './types'
+import { RendererBuilder } from './rendering/renderer'
+import { FormBuilder } from './rendering/builder'
 
 export async function getNextExercise(lessonName: string): Promise<void> {
     const entryCounter: EntryCounter | undefined = await invoke(
@@ -16,29 +17,23 @@ export async function getNextExercise(lessonName: string): Promise<void> {
     const counter = entryCounter.counter
     const entry = entryCounter.entry
 
-    const html = `
-    <h1>${entry.japanese}</h1>
-    <h3>Exercise ${counter.current} out of ${counter.stop_at}</h3>
-    <form id="form">
-        <input type="text" id="input" placeholder="English transcript" autocomplete="off">
-        <button type="button" id="submit">Submit</button>
-    </form>
-    <h3 id="result"></h3>
-    `
-
-    const mainDivElement = getMainDivElement()
-    mainDivElement.innerHTML = html
-
-    document.getElementById('submit')!.onclick = async (): Promise<void> => {
-        await onSubmit(lessonName, entry)
-    }
-    document
-        .getElementById('form')!
-        .addEventListener('submit', async (event): Promise<void> => {
-            event.preventDefault()
-            await onSubmit(lessonName, entry)
+    new RendererBuilder()
+        .addHeader1({ text: entry.japanese })
+        .addHeader3({
+            text: `Exercise ${counter.current} out of ${counter.stop_at}`,
         })
-    document.getElementById('input')?.focus()
+        .addForm(
+            new FormBuilder(
+                'form',
+                async (): Promise<void> => callback(lessonName, entry),
+            )
+                .addInput({ id: 'input', placeholder: 'English transcript' })
+                .addButton({ id: 'submit', text: 'Submit' })
+                .build(),
+        )
+        .addHeader3({ text: '', id: 'result' })
+        .build()
+        .renderAndRegisterCallbacks()
 }
 
 async function onSubmit(lessonName: string, entry: Entry): Promise<void> {
@@ -63,4 +58,14 @@ async function onSubmit(lessonName: string, entry: Entry): Promise<void> {
 
     await new Promise((resolve) => setTimeout(resolve, 500))
     await getNextExercise(lessonName)
+}
+
+function callback(lessonName: string, entry: Entry): void {
+    document
+        .getElementById('form')!
+        .addEventListener('submit', async (event): Promise<void> => {
+            event.preventDefault()
+            await onSubmit(lessonName, entry)
+        })
+    document.getElementById('input')?.focus()
 }

@@ -1,75 +1,65 @@
 import { getNextExercise } from './lesson'
-import { getMainDivElement } from './main'
 import { createMenu } from './menu'
 import { ConfigManager } from './config_manager'
 import { generateLesson } from './agentic_lesson'
+import { RendererBuilder } from './rendering/renderer'
+import { DivBuilder } from './rendering/builder'
 
 export async function createGroupMenu(
     configManager: ConfigManager,
     callback: (lessonOrder: Array<string>) => Promise<void>,
 ): Promise<void> {
-    const groupButtons = configManager
-        .getGroupOrder()
-        .map((groupName) => {
-            return `<button id="${groupName}">${capitalize(groupName)} group</button>`
-        })
-        .join('')
-
-    const html = `
-    <div class="menu">
-        <button id="agentic-lesson">Agentic Lesson</button>
-        ${groupButtons}
-        <button id="main-menu">Back to main menu</button>
-    </div>
-    `
-
-    getMainDivElement().innerHTML = html
-
-    document.getElementById('agentic-lesson')!.onclick =
-        async (): Promise<void> => {
-            await generateLesson()
-        }
-
-    configManager.getGroupOrder().forEach((groupName) => {
-        document.getElementById(groupName)!.onclick =
-            async (): Promise<void> => {
-                await callback(configManager.getLessonOrder(groupName))
-            }
+    const divBuilder = new DivBuilder('menu', ['menu']).addButton({
+        id: 'agentic-lesson',
+        text: 'Agentic Lesson',
+        callback: async (): Promise<void> => await generateLesson(),
     })
 
-    document.getElementById('main-menu')!.onclick = async (): Promise<void> => {
-        await createMenu()
-    }
+    configManager.getGroupOrder().forEach((groupName) => {
+        divBuilder.addButton({
+            id: groupName,
+            text: `${capitalize(groupName)} group`,
+            callback: async (): Promise<void> =>
+                await callback(configManager.getLessonOrder(groupName)),
+        })
+    })
+
+    divBuilder.addButton({
+        id: 'main-menu',
+        text: 'Back to main menu',
+        callback: async (): Promise<void> => await createMenu(),
+    })
+
+    new RendererBuilder()
+        .addDiv(divBuilder.build())
+        .build()
+        .renderAndRegisterCallbacks()
 }
 
 export async function createLessonMenu(
     lessonOrder: Array<string>,
 ): Promise<void> {
-    const lessonButtons = lessonOrder
-        .map((lessonName) => {
-            return `<button id="${lessonName}">${capitalize(lessonName)} lesson</button>`
-        })
-        .join('')
-
-    const html = `
-    <div class="menu">
-        ${lessonButtons}
-        <button id="main-menu">Back to main menu</button>
-    </div>
-    `
-
-    getMainDivElement().innerHTML = html
+    const divBuilder = new DivBuilder('menu', ['menu'])
 
     lessonOrder.forEach((lessonName) => {
-        document.getElementById(lessonName)!.onclick =
-            async (): Promise<void> => {
-                await getNextExercise(lessonName)
-            }
+        divBuilder.addButton({
+            id: lessonName,
+            text: `${capitalize(lessonName)} lesson`,
+            callback: async (): Promise<void> =>
+                await getNextExercise(lessonName),
+        })
     })
 
-    document.getElementById('main-menu')!.onclick = async (): Promise<void> => {
-        await createMenu()
-    }
+    divBuilder.addButton({
+        id: 'main-menu',
+        text: 'Back to main menu',
+        callback: async (): Promise<void> => await createMenu(),
+    })
+
+    new RendererBuilder()
+        .addDiv(divBuilder.build())
+        .build()
+        .renderAndRegisterCallbacks()
 }
 
 function capitalize(str: string): string {

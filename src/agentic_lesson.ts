@@ -1,23 +1,26 @@
 import { invoke } from '@tauri-apps/api/core'
 import type { AgenticLesson, Translation } from './types'
 import { createMenu } from './menu'
+import { RendererBuilder } from './rendering/renderer'
+import { FormBuilder } from './rendering/builder'
 
 export async function renderSetApiKeyPage(): Promise<void> {
-    const html = `
-    <h1>Set Gemini API Key</h1>
-    <form id="form">
-        <input type="text" id="input" placeholder="API Key" autocomplete="off">
-        <button type="button" id="submit">Submit</button>
-    </form>
-    `
+    new RendererBuilder()
+        .addHeader1({ text: 'Set Gemini API Key' })
+        .addForm(
+            new FormBuilder(
+                'form',
+                async (): Promise<void> => apiKeyFormCallback(),
+            )
+                .addInput({ id: 'input', placeholder: 'API Key' })
+                .addButton({ id: 'submit', text: 'Submit' })
+                .build(),
+        )
+        .build()
+        .renderAndRegisterCallbacks()
+}
 
-    const mainDivElement = document.querySelector<HTMLDivElement>('#app')!
-    mainDivElement.innerHTML = html
-
-    document.getElementById('submit')!.onclick = async (): Promise<void> => {
-        await setApiKey()
-        await createMenu()
-    }
+function apiKeyFormCallback(): void {
     document
         .getElementById('form')!
         .addEventListener('submit', async (event): Promise<void> => {
@@ -25,6 +28,7 @@ export async function renderSetApiKeyPage(): Promise<void> {
             await setApiKey()
             await createMenu()
         })
+    document.getElementById('input')?.focus()
 }
 
 async function setApiKey(): Promise<void> {
@@ -40,27 +44,21 @@ export async function generateLesson(): Promise<void> {
         return renderSetApiKeyPage()
     }
 
-    const html = `
-    <h1>${agenticLesson.japanese_text}</h1>
-    <form id="form">
-        <input type="text" id="input" placeholder="English translation" autocomplete="off">
-        <button type="button" id="submit">Submit</button>
-    </form>
-    <h3 id="result"></h3>
-    `
-
-    const mainDivElement = document.querySelector<HTMLDivElement>('#app')!
-    mainDivElement.innerHTML = html
-
-    document.getElementById('submit')!.onclick = async (): Promise<void> => {
-        await validateTranslation(agenticLesson.japanese_text)
-    }
-    document
-        .getElementById('form')!
-        .addEventListener('submit', async (event): Promise<void> => {
-            event.preventDefault()
-            await validateTranslation(agenticLesson.japanese_text)
-        })
+    new RendererBuilder()
+        .addHeader1({ text: agenticLesson.japanese_text })
+        .addForm(
+            new FormBuilder(
+                'form',
+                async (): Promise<void> =>
+                    lessonCallback(agenticLesson.japanese_text),
+            )
+                .addInput({ id: 'input', placeholder: 'English translation' })
+                .addButton({ id: 'submit', text: 'submit' })
+                .build(),
+        )
+        .addHeader3({ text: '', id: 'result' })
+        .build()
+        .renderAndRegisterCallbacks()
 }
 
 export async function validateTranslation(originalText: string): Promise<void> {
@@ -70,20 +68,28 @@ export async function validateTranslation(originalText: string): Promise<void> {
         { original: originalText, translation: input },
     )
 
-    const html = `
-    <h2>Original text '${translation.original_text}'</h2>
-    <h3>Translation: '${translation.translation}'</h3>
-    <h3>Correction: '${translation.correction}'</h3>
-    <h3>Mistakes: '${translation.mistakes}'</h3>
-    <h3>Suggestions: '${translation.suggestions}'</h3>
-    <h3>Mark: '${translation.mark}'</h3>
-    <button id="main-menu">Back to main menu</button>
-    `
+    new RendererBuilder()
+        .addHeader2({ text: `Original text '${translation.original_text}'` })
+        .addHeader3({ text: `Translation: '${translation.translation}'` })
+        .addHeader3({ text: `Correction: '${translation.correction}'` })
+        .addHeader3({ text: `Mistakes: '${translation.mistakes}'` })
+        .addHeader3({ text: `Suggestions: '${translation.suggestions}'` })
+        .addHeader3({ text: `Mark: '${translation.mark}'` })
+        .addButton({
+            id: 'main-menu',
+            text: 'Back to main menu',
+            callback: async (): Promise<void> => await createMenu(),
+        })
+        .build()
+        .renderAndRegisterCallbacks()
+}
 
-    const mainDivElement = document.querySelector<HTMLDivElement>('#app')!
-    mainDivElement.innerHTML = html
-
-    document.getElementById('main-menu')!.onclick = async (): Promise<void> => {
-        await createMenu()
-    }
+function lessonCallback(japaneseText: string): void {
+    document
+        .getElementById('form')!
+        .addEventListener('submit', async (event): Promise<void> => {
+            event.preventDefault()
+            await validateTranslation(japaneseText)
+        })
+    document.getElementById('input')?.focus()
 }
