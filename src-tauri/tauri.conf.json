@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "jlearn",
+  "productName": "Japanese language learn",
   "version": "0.1.0",
   "identifier": "com.tauri.dev",
   "build": {
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "JLearn",
+        "title": "Japanese language learn",
         "width": 800,
         "height": 600,
         "resizable": true,
