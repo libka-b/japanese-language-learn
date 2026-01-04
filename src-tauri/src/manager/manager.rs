@@ -1,43 +1,45 @@
-use crate::manager::{Counter, Entry, EntryCounter, Generator, JsonCompatibleStats, Stats};
+use crate::manager::{Counter, EntryCounter, Generator, JsonCompatibleStats, Stats};
 use csv::Reader;
 use std::collections::HashSet;
 use tauri::{path::BaseDirectory, AppHandle, Manager as TauriManager};
+use serde::{Serialize, de::DeserializeOwned};
+use std::hash::Hash;
 
-pub struct Manager {
+pub struct Manager<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> {
     resource_path: String,
     stats_path: String,
-    stats: Option<Stats>,
-    generator: Option<Generator>,
+    stats: Option<Stats<T>>,
+    entry_generator: Option<Generator<T>>,
 }
 
-impl Manager {
+impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T> {
     pub fn new(resource_path: String, stats_path: String) -> Self {
         Self {
             resource_path,
             stats_path,
             stats: None,
-            generator: None,
+            entry_generator: None,
         }
     }
 
-    pub fn get_next(&mut self, handle: AppHandle) -> Option<EntryCounter> {
-        if self.generator.is_none() {
-            self.generator = Some(
+    pub fn get_next(&mut self, handle: AppHandle) -> Option<EntryCounter<T>> {
+        if self.entry_generator.is_none() {
+            self.entry_generator = Some(
                 self.load_generator(handle)
                     .expect("Unable to load generator."),
             )
         }
 
-        match self.generator.as_mut().unwrap().next() {
+        match self.entry_generator.as_mut().unwrap().next() {
             Some(entry) => Some(entry),
             None => {
-                self.generator = None;
+                self.entry_generator = None;
                 None
             }
         }
     }
 
-    pub fn get_stats(&mut self, handle: AppHandle) -> Stats {
+    pub fn get_stats(&mut self, handle: AppHandle) -> Stats<T> {
         if self.stats.is_none() {
             self.stats = Some(self.load_stats(handle));
         }
@@ -45,7 +47,7 @@ impl Manager {
         self.stats.as_ref().unwrap().clone()
     }
 
-    pub fn add_correct(&mut self, handle: AppHandle, entry: Entry) {
+    pub fn add_correct(&mut self, handle: AppHandle, entry: T) {
         if self.stats.is_none() {
             self.stats = Some(self.load_stats(handle));
         }
@@ -53,7 +55,7 @@ impl Manager {
         self.stats.as_mut().unwrap().add_correct(entry);
     }
 
-    pub fn add_incorrect(&mut self, handle: AppHandle, entry: Entry) {
+    pub fn add_incorrect(&mut self, handle: AppHandle, entry: T) {
         if self.stats.is_none() {
             self.stats = Some(self.load_stats(handle));
         }
@@ -68,10 +70,10 @@ impl Manager {
         }
     }
 
-    fn load_generator(&mut self, handle: AppHandle) -> Result<Generator, String> {
+    fn load_generator(&mut self, handle: AppHandle) -> Result<Generator<T>, String> {
         let entries = self.load_entries(handle.clone());
         let stats = self.get_stats(handle);
-        let wrong: HashSet<Entry> = stats.wrong.keys().cloned().collect();
+        let wrong: HashSet<T> = stats.wrong.keys().cloned().collect();
         let entries_len = entries.len() as u32;
 
         let stop_at = compute_stop_at(entries_len, stats);
@@ -79,7 +81,7 @@ impl Manager {
         Generator::new(entries, wrong, counter)
     }
 
-    fn load_stats(&self, handle: AppHandle) -> Stats {
+    fn load_stats(&self, handle: AppHandle) -> Stats<T> {
         let stats_path = handle
             .path()
             .resolve(&self.stats_path, BaseDirectory::AppData)
@@ -91,7 +93,7 @@ impl Manager {
         json_stats.to_stats()
     }
 
-    fn load_entries(&self, handle: AppHandle) -> HashSet<Entry> {
+    fn load_entries(&self, handle: AppHandle) -> HashSet<T> {
         let resource_path = handle
             .path()
             .resolve(&self.resource_path, BaseDirectory::Resource)
@@ -101,7 +103,7 @@ impl Manager {
 
         let mut reader = Reader::from_path(resource_path).expect("Unable tp read CSV file");
 
-        let records: Vec<Entry> = reader.deserialize().filter_map(Result::ok).collect();
+        let records: Vec<T> = reader.deserialize().filter_map(Result::ok).collect();
 
         records.into_iter().collect()
     }
@@ -109,7 +111,7 @@ impl Manager {
 
 // stop_at is computed as half of the total entries + % of mistakes done * total entries
 // that means, the worst case scenario (100% mistakes) it will end up being 1.5 times the total entries
-fn compute_stop_at(entries_len: u32, stats: Stats) -> u32 {
+fn compute_stop_at<T: DeserializeOwned + Clone + PartialEq + Eq + Hash>(entries_len: u32, stats: Stats<T>) -> u32 {
     let base = entries_len as f32 / 2.0;
     let extra = match stats.total {
         0 => 0.0,
@@ -122,10 +124,11 @@ fn compute_stop_at(entries_len: u32, stats: Stats) -> u32 {
 mod tests {
     use super::*;
     use std::collections::HashMap;
+    use crate::manager::CharacterEntry;
 
     #[test]
     fn test_compute_stop_at_empty_stats() {
-        let stats = Stats {
+        let stats = Stats::<CharacterEntry> {
             total: 0,
             incorrect: 0,
             wrong: HashMap::new(),
@@ -137,7 +140,7 @@ mod tests {
 
     #[test]
     fn test_compute_stop_at_some_stats() {
-        let stats = Stats {
+        let stats = Stats::<CharacterEntry> {
             total: 10,
             incorrect: 5,
             wrong: HashMap::new(),

@@ -36,7 +36,7 @@ async function setApiKey(): Promise<void> {
     await invoke('set_api_key', { key: key })
 }
 
-export async function generateLesson(): Promise<void> {
+export async function generateAgenticLesson(): Promise<void> {
     let agenticLesson: AgenticLesson
     try {
         agenticLesson = await invoke('generate_agentic_lesson')

@@ -1,27 +1,71 @@
-import { getNextExercise } from './lesson'
+import { getNextCharacterExercise } from './character_lesson'
+import { getNextVocabularyExercise } from './vocabulary_lesson'
 import { createMenu } from './menu'
 import { ConfigManager } from './config_manager'
-import { generateLesson } from './agentic_lesson'
+import { generateAgenticLesson } from './agentic_lesson'
 import { RendererBuilder } from './rendering/renderer'
 import { DivBuilder } from './rendering/builder'
+import type { LessonType, LessonGroup, LessonTypeEnum } from './types'
+
+function isAgentic(lessonType: LessonType): lessonType is 'Agentic' {
+    return lessonType === 'Agentic'
+}
+
+function isCharacter(
+    lessonType: LessonType,
+): lessonType is { Character: LessonGroup } {
+    return typeof lessonType === 'object' && 'Character' in lessonType
+}
+
+function isVocabulary(
+    lessonType: LessonType,
+): lessonType is { Vocabulary: LessonGroup } {
+    return typeof lessonType === 'object' && 'Vocabulary' in lessonType
+}
 
 export async function createGroupMenu(
     configManager: ConfigManager,
-    callback: (lessonOrder: Array<string>) => Promise<void>,
+    callback: (
+        lessonOrder: Array<string>,
+        lessonTypeEnum: LessonTypeEnum,
+    ) => Promise<void>,
 ): Promise<void> {
-    const divBuilder = new DivBuilder('menu', ['menu']).addButton({
-        id: 'agentic-lesson',
-        text: 'Agentic Lesson',
-        callback: async (): Promise<void> => await generateLesson(),
-    })
+    const divBuilder = new DivBuilder('menu', ['menu'])
 
     configManager.getGroupOrder().forEach((groupName) => {
-        divBuilder.addButton({
-            id: groupName,
-            text: `${capitalize(groupName)} group`,
-            callback: async (): Promise<void> =>
-                await callback(configManager.getLessonOrder(groupName)),
-        })
+        const lessonObj = configManager.getLessonType(groupName)
+        if (isAgentic(lessonObj)) {
+            divBuilder.addButton({
+                id: 'agentic-lesson',
+                text: 'Agentic lesson',
+                callback: async (): Promise<void> =>
+                    await generateAgenticLesson(),
+            })
+        }
+
+        if (isCharacter(lessonObj)) {
+            divBuilder.addButton({
+                id: groupName,
+                text: `${capitalize(groupName)} group`,
+                callback: async (): Promise<void> =>
+                    await callback(
+                        lessonObj.Character.lesson_order,
+                        'CHARACTER',
+                    ),
+            })
+        }
+
+        if (isVocabulary(lessonObj)) {
+            divBuilder.addButton({
+                id: groupName,
+                text: `${capitalize(groupName)} group`,
+                callback: async (): Promise<void> =>
+                    await callback(
+                        lessonObj.Vocabulary.lesson_order,
+                        'VOCABULARY',
+                    ),
+            })
+        }
     })
 
     divBuilder.addButton({
@@ -38,6 +82,7 @@ export async function createGroupMenu(
 
 export async function createLessonMenu(
     lessonOrder: Array<string>,
+    lessonTypeEnum: LessonTypeEnum,
 ): Promise<void> {
     const divBuilder = new DivBuilder('menu', ['menu'])
 
@@ -45,8 +90,15 @@ export async function createLessonMenu(
         divBuilder.addButton({
             id: lessonName,
             text: `${capitalize(lessonName)} lesson`,
-            callback: async (): Promise<void> =>
-                await getNextExercise(lessonName),
+            callback: async (): Promise<void> => {
+                if (lessonTypeEnum == 'CHARACTER') {
+                    await getNextCharacterExercise(lessonName)
+                }
+
+                if (lessonTypeEnum == 'VOCABULARY') {
+                    await getNextVocabularyExercise(lessonName)
+                }
+            },
         })
     })
 

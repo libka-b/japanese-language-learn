@@ -2,6 +2,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum LessonType {
+    Agentic,
+    Character(LessonGroup),
+    Vocabulary(LessonGroup),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LessonConfig {
     pub name: String,
     pub path: String,
@@ -23,5 +30,5 @@ pub struct LessonGroup {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub group_order: Vec<String>,
-    pub group_map: HashMap<String, LessonGroup>,
+    pub group_map: HashMap<String, LessonType>,
 }

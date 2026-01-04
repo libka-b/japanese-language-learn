@@ -1,25 +1,18 @@
-use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use serde::de::DeserializeOwned;
+use std::{collections::HashSet, hash::Hash};
+use crate::manager::{Counter, EntryCounter};
 
-use crate::manager::{Counter, Entry};
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct EntryCounter {
-    entry: Entry,
+pub struct Generator<T: DeserializeOwned + Clone + PartialEq + Eq + Hash> {
+    entries: HashSet<T>,
+    wrong: HashSet<T>,
+    returned: HashSet<T>,
     counter: Counter,
 }
 
-pub struct Generator {
-    entries: HashSet<Entry>,
-    wrong: HashSet<Entry>,
-    returned: HashSet<Entry>,
-    counter: Counter,
-}
-
-impl Generator {
+impl <T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Generator<T> {
     pub fn new(
-        entries: HashSet<Entry>,
-        wrong: HashSet<Entry>,
+        entries: HashSet<T>,
+        wrong: HashSet<T>,
         counter: Counter,
     ) -> Result<Self, String> {
         if entries.is_empty() {
@@ -34,7 +27,7 @@ impl Generator {
         }
     }
 
-    pub fn next(&mut self) -> Option<EntryCounter> {
+    pub fn next(&mut self) -> Option<EntryCounter<T>> {
         if !self.counter.should_continue() {
             return None;
         }
@@ -81,20 +74,25 @@ impl Generator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::manager::CharacterEntry;
 
     #[test]
     fn test_generator_empty_entries() {
-        let generator = Generator::new(HashSet::new(), HashSet::new(), Counter::new(1));
+        let generator = Generator::<CharacterEntry>::new(
+            HashSet::new(),
+            HashSet::new(),
+            Counter::new(1)
+        );
         assert!(generator.is_err());
     }
 
     #[test]
     fn test_generator_next_with_non_empty_wrong() {
-        let wrong_entry: Entry = Entry {
+        let wrong_entry: CharacterEntry = CharacterEntry {
             japanese: "a".to_string(),
             english: "a".to_string(),
         };
-        let other_entry: Entry = Entry {
+        let other_entry: CharacterEntry = CharacterEntry {
             japanese: "b".to_string(),
             english: "b".to_string(),
         };
@@ -114,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_generator_next_with_empty_wrong() {
-        let entry: Entry = Entry {
+        let entry: CharacterEntry = CharacterEntry {
             japanese: "a".to_string(),
             english: "a".to_string(),
         };
@@ -133,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_generator_next_resets_after_exhausting_entries() {
-        let entry: Entry = Entry {
+        let entry: CharacterEntry = CharacterEntry {
             japanese: "a".to_string(),
             english: "a".to_string(),
         };

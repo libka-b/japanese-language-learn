@@ -1,11 +1,32 @@
 import { invoke } from '@tauri-apps/api/core'
-import type { Stats } from './types'
+import type {
+    CharacterEntry,
+    LessonTypeEnum,
+    Stats,
+    VocabularyEntry,
+} from './types'
 import { createMenu } from './menu'
 import { RendererBuilder } from './rendering/renderer'
 import { TableBuilder, DivBuilder } from './rendering/builder'
 
-export async function showStats(lessonOrder: Array<string>): Promise<void> {
-    const namedStats: Record<string, Stats> = await invoke('get_stats')
+async function getStats(
+    lessonTypeEnum: LessonTypeEnum,
+): Promise<Record<string, Stats<CharacterEntry | VocabularyEntry>>> {
+    if (lessonTypeEnum == 'CHARACTER') {
+        return await invoke('get_character_entry_stats')
+    } else {
+        return await invoke('get_vocabulary_entry_stats')
+    }
+}
+
+export async function showStats(
+    lessonOrder: Array<string>,
+    lessonTypeEnum: LessonTypeEnum,
+): Promise<void> {
+    const namedStats: Record<
+        string,
+        Stats<CharacterEntry | VocabularyEntry>
+    > = await getStats(lessonTypeEnum)
 
     const rendererBuilder = new RendererBuilder(
         async (): Promise<void> => toggleHide(),

@@ -1,32 +1,22 @@
-use crate::manager::Entry;
+use crate::manager::{EntryCount, Stats};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::{collections::HashMap, fs};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
-
-#[derive(Debug, Clone)]
-pub struct Stats {
-    pub total: u32,
-    pub incorrect: u32,
-    pub wrong: HashMap<Entry, u32>,
-}
+use std::hash::Hash;
+use serde::de::DeserializeOwned;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct EntryCount {
-    pub entry: Entry,
-    pub count: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct JsonCompatibleStats {
+#[serde(bound = "")]
+pub struct JsonCompatibleStats<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> {
     pub total: u32,
     pub incorrect: u32,
-    pub wrong: Vec<EntryCount>,
+    pub wrong: Vec<EntryCount<T>>,
 }
 
-impl JsonCompatibleStats {
-    pub fn from_stats(stats: Stats) -> Self {
+impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> JsonCompatibleStats<T> {
+    pub fn from_stats(stats: Stats<T>) -> Self {
         Self {
             total: stats.total,
             incorrect: stats.incorrect,
@@ -42,7 +32,7 @@ impl JsonCompatibleStats {
         }
     }
 
-    pub fn to_stats(&self) -> Stats {
+    pub fn to_stats(&self) -> Stats<T> {
         Stats {
             total: self.total,
             incorrect: self.incorrect,
@@ -83,7 +73,7 @@ impl JsonCompatibleStats {
     }
 }
 
-impl Stats {
+impl <T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Stats<T> {
     pub fn new() -> Self {
         Self {
             total: 0,
@@ -92,7 +82,7 @@ impl Stats {
         }
     }
 
-    pub fn add_correct(&mut self, entry: Entry) {
+    pub fn add_correct(&mut self, entry: T) {
         self.wrong.entry(entry).and_modify(|value| {
             if *value > 0 {
                 *value -= 1;
@@ -101,7 +91,7 @@ impl Stats {
         self.total += 1;
     }
 
-    pub fn add_incorrect(&mut self, entry: Entry) {
+    pub fn add_incorrect(&mut self, entry: T) {
         self.total += 1;
         self.incorrect += 1;
         *self.wrong.entry(entry).or_insert(0) += 1
@@ -111,11 +101,12 @@ impl Stats {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::manager::CharacterEntry;
 
     #[test]
     fn test_add_correct() {
         let mut stats = Stats::new();
-        let entry = Entry {
+        let entry = CharacterEntry {
             japanese: "a".to_string(),
             english: "a".to_string(),
         };
@@ -129,7 +120,7 @@ mod tests {
     #[test]
     fn test_add_incorrect() {
         let mut stats = Stats::new();
-        let entry = Entry {
+        let entry = CharacterEntry {
             japanese: "a".to_string(),
             english: "a".to_string(),
         };

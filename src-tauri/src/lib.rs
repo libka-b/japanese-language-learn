@@ -6,11 +6,15 @@ mod manager;
 use agent::{ApiKey, ApiKeyError};
 use config::get_config;
 use lesson::{
-    add_correct,
-    add_incorrect,
+    add_correct_character_entry,
+    add_correct_vocabulary_entry,
+    add_incorrect_character_entry,
+    add_incorrect_vocabulary_entry,
     exit_app,
-    get_stats,
-    next_lesson_entry,
+    get_character_entry_stats,
+    get_vocabulary_entry_stats,
+    next_character_lesson_entry,
+    next_vocabulary_lesson_entry,
     generate_agentic_lesson,
     validate_translation_lesson,
     set_api_key,
@@ -85,14 +89,18 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            get_config,
+            add_correct_character_entry,
+            add_correct_vocabulary_entry,
+            add_incorrect_character_entry,
+            add_incorrect_vocabulary_entry,
+            exit_app,
+            get_character_entry_stats,
+            get_vocabulary_entry_stats,
+            next_character_lesson_entry,
+            next_vocabulary_lesson_entry,
             generate_agentic_lesson,
             validate_translation_lesson,
-            exit_app,
-            next_lesson_entry,
-            add_correct,
-            add_incorrect,
-            get_stats,
-            get_config,
             set_api_key,
         ])
         .run(tauri::generate_context!())

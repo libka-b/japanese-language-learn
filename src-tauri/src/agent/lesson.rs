@@ -28,7 +28,7 @@ pub fn generate_lesson(api_key: ApiKey) -> Result<LessonData, Box<dyn std::error
     let topic = TOPICS.choose(&mut rng()).unwrap();
     query_gemini(
         api_key,
-        format!("Generate simple text in hiragana for user to translate. The text should be about ${}", topic),
+        format!("Generate simple text using only hiragana for user to translate. The text should be about ${}", topic),
         SYSTEM_INSTRUCTION.to_string(),
     )
 }

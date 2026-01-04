@@ -1,6 +1,6 @@
 mod config;
 mod counter;
-mod entry;
+mod model;
 mod generator;
 mod router;
 mod stats;
@@ -10,9 +10,8 @@ mod manager;
 
 pub use config::Config;
 use counter::Counter;
-pub use entry::Entry;
-pub use generator::EntryCounter;
+pub use model::{CharacterEntry, VocabularyEntry, EntryCounter, Stats, EntryCount};
 use generator::Generator;
 pub use manager::Manager;
 pub use router::Router;
-pub use stats::{JsonCompatibleStats, Stats};
+pub use stats::JsonCompatibleStats;

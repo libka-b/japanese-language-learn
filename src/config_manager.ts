@@ -1,4 +1,4 @@
-import type { Config } from './types'
+import type { Config, LessonType } from './types'
 
 export class ConfigManager {
     private config: Config
@@ -8,6 +8,6 @@ export class ConfigManager {
     }
 
     getGroupOrder = (): Array<string> => this.config.group_order
-    getLessonOrder = (groupName: string): Array<string> =>
-        this.config.group_map[groupName].lesson_order
+    getLessonType = (groupName: string): LessonType =>
+        this.config.group_map[groupName]
 }

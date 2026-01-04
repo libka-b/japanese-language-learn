@@ -1,6 +1,12 @@
-export interface Entry {
+export interface CharacterEntry {
     readonly japanese: string
     readonly english: string
+}
+
+export interface VocabularyEntry {
+    readonly japanese: string
+    readonly english: string
+    readonly pronunciation: string
 }
 
 export interface Counter {
@@ -8,20 +14,20 @@ export interface Counter {
     readonly stop_at: number
 }
 
-export interface EntryCounter {
-    readonly entry: Entry
+export interface EntryCounter<T> {
+    readonly entry: T
     readonly counter: Counter
 }
 
-export interface EntryCount {
-    readonly entry: Entry
+export interface EntryCount<T> {
+    readonly entry: T
     readonly count: number
 }
 
-export interface Stats {
+export interface Stats<T> {
     readonly total: number
     readonly incorrect: number
-    readonly wrong: EntryCount[]
+    readonly wrong: EntryCount<T>[]
 }
 
 export interface LessonConfig {
@@ -30,15 +36,23 @@ export interface LessonConfig {
 }
 
 export interface LessonGroup {
+    readonly lesson_type: 'Agentic' | 'Character' | 'Vocabulary'
     readonly name: string
     readonly lesson_map: Record<string, LessonConfig>
     readonly lesson_order: Array<string>
 }
 
+export type LessonType =
+    | 'Agentic'
+    | { Character: LessonGroup }
+    | { Vocabulary: LessonGroup }
+
 export interface Config {
-    readonly group_map: Record<string, LessonGroup>
+    readonly group_map: Record<string, LessonType>
     readonly group_order: Array<string>
 }
+
+export type LessonTypeEnum = 'AGENTIC' | 'CHARACTER' | 'VOCABULARY'
 
 export interface AgenticLesson {
     readonly japanese_text: string

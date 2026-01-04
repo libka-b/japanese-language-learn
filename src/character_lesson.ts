@@ -1,12 +1,14 @@
 import { invoke } from '@tauri-apps/api/core'
 import { createMenu } from './menu'
-import type { EntryCounter, Entry } from './types'
+import type { EntryCounter, CharacterEntry } from './types'
 import { RendererBuilder } from './rendering/renderer'
 import { FormBuilder } from './rendering/builder'
 
-export async function getNextExercise(lessonName: string): Promise<void> {
-    const entryCounter: EntryCounter | undefined = await invoke(
-        'next_lesson_entry',
+export async function getNextCharacterExercise(
+    lessonName: string,
+): Promise<void> {
+    const entryCounter: EntryCounter<CharacterEntry> | undefined = await invoke(
+        'next_character_lesson_entry',
         { lessonName: lessonName },
     )
     if (!entryCounter) {
@@ -36,7 +38,10 @@ export async function getNextExercise(lessonName: string): Promise<void> {
         .renderAndRegisterCallbacks()
 }
 
-async function onSubmit(lessonName: string, entry: Entry): Promise<void> {
+async function onSubmit(
+    lessonName: string,
+    entry: CharacterEntry,
+): Promise<void> {
     const input = (document.getElementById('input') as HTMLInputElement).value
     const isCorrect = input === entry.english ? true : false
     const message = isCorrect
@@ -45,22 +50,22 @@ async function onSubmit(lessonName: string, entry: Entry): Promise<void> {
     document.getElementById('result')!.innerHTML = message
 
     if (isCorrect) {
-        await invoke('add_correct', {
+        await invoke('add_correct_character_entry', {
             entry: { japanese: entry.japanese, english: entry.english },
             lessonName: lessonName,
         })
     } else {
-        await invoke('add_incorrect', {
+        await invoke('add_incorrect_character_entry', {
             entry: { japanese: entry.japanese, english: entry.english },
             lessonName: lessonName,
         })
     }
 
     await new Promise((resolve) => setTimeout(resolve, 500))
-    await getNextExercise(lessonName)
+    await getNextCharacterExercise(lessonName)
 }
 
-function callback(lessonName: string, entry: Entry): void {
+function callback(lessonName: string, entry: CharacterEntry): void {
     document
         .getElementById('form')!
         .addEventListener('submit', async (event): Promise<void> => {
