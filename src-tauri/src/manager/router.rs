@@ -1,4 +1,5 @@
-use crate::manager::{CharacterEntry, Config, EntryCounter, Manager, Stats, VocabularyEntry};
+use crate::manager::character_learning_manager::CharacterLearningManager;
+use crate::manager::{CharacterEntry, CharacterEntryTable, Config, EntryCounter, Manager, Stats, VocabularyEntry};
 use crate::manager::config::LessonType;
 use std::collections::HashMap;
 use tauri::AppHandle;
@@ -6,16 +7,18 @@ use tauri::AppHandle;
 pub struct Router {
     character_manager_map: HashMap<String, Manager<CharacterEntry>>,
     vocabulary_manager_map: HashMap<String, Manager<VocabularyEntry>>,
+    character_learning_manager_map: HashMap<String, CharacterLearningManager>,
 }
 
 impl Router {
     pub fn new(config: Config) -> Result<Self, String> {
         let mut character_manager_map = HashMap::new();
         let mut vocabulary_manager_map = HashMap::new();
+        let mut character_learning_manager_map = HashMap::new();
 
         for lesson_group in config.group_map.values() {
             match lesson_group {
-                LessonType::Character(group) => {
+                LessonType::CharacterExercise(group) => {
                     for lesson_config in group.lesson_map.values() {
                         if character_manager_map.contains_key(&lesson_config.name) {
                             return Err(format!(
@@ -29,7 +32,7 @@ impl Router {
                         );
                    }
                 },
-                LessonType::Vocabulary(group) => {
+                LessonType::VocabularyExercise(group) => {
                     for lesson_config in group.lesson_map.values() {
                         if vocabulary_manager_map.contains_key(&lesson_config.name) {
                             return Err(format!(
@@ -43,11 +46,26 @@ impl Router {
                         );
                    }
                 },
-                LessonType::Agentic => {},
+                LessonType::AgenticExercise => {},
+                LessonType::CharacterLearning(group) => {
+                    for lesson_config in group.lesson_map.values() {
+                        character_learning_manager_map.insert(
+                            lesson_config.name.clone(),
+                            CharacterLearningManager::new(lesson_config.clone()),
+                        );
+                    }
+                }
             }
         }
 
-        Ok(Self { character_manager_map, vocabulary_manager_map })
+        Ok(Self { character_manager_map, vocabulary_manager_map, character_learning_manager_map })
+    }
+
+    pub fn get_character_table(&mut self, handle: AppHandle, name: &str) -> CharacterEntryTable {
+        self.character_learning_manager_map
+            .get_mut(name)
+            .expect(&format!("Unable to load manager map for name `{}`", name))
+            .get_character_entry_table(handle)
     }
 
     pub fn get_next_character_entry(&mut self, handle: AppHandle, name: &str) -> Option<EntryCounter<CharacterEntry>> {

@@ -1,10 +1,20 @@
 group_order:
+  - learning
   - agentic
   - character
   - vocabulary
 group_map:
-  agentic: !Agentic
-  character: !Character
+  learning: !CharacterLearning
+    name: Character Learning
+    lesson_order:
+      - hiragana
+    lesson_map:
+      hiragana:
+        name: hiragana
+        character_path: resources/hiragana.csv
+        character_table_path: resources/hiragana-table.csv
+  agentic: !AgenticExercise
+  character: !CharacterExercise
     name: Character lessons
     lesson_order:
       - hiragana
@@ -24,7 +34,7 @@ group_map:
       katakana-plus:
         name: katakana-plus
         path: resources/katakana-plus.csv
-  vocabulary: !Vocabulary
+  vocabulary: !VocabularyExercise
     name: Vocabulary Lessons
     lesson_order:
       - hiragana-vocabulary

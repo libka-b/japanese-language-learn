@@ -34,3 +34,17 @@ pub struct EntryCount<T: DeserializeOwned + Serialize> {
     pub entry: T,
     pub count: u32,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CharacterEntryRow {
+    pub col1: Option<CharacterEntry>,
+    pub col2: Option<CharacterEntry>,
+    pub col3: Option<CharacterEntry>,
+    pub col4: Option<CharacterEntry>,
+    pub col5: Option<CharacterEntry>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CharacterEntryTable {
+    pub rows: Vec<CharacterEntryRow>,
+}

@@ -151,7 +151,7 @@ export class Form extends AbstractElement<FormOptions> {
 
 export interface TableOptions extends IOptions {
     readonly headers: Array<string>
-    readonly rows: Array<Array<string>>
+    readonly rows: Array<Array<IElement>>
 }
 
 export class Table extends AbstractElement<TableOptions> {
@@ -159,7 +159,7 @@ export class Table extends AbstractElement<TableOptions> {
         const renderedRows = this.options.rows
             .map((row) => {
                 const renderedRow = row
-                    .map((cell) => `<td>${cell}</td>`)
+                    .map((cell) => `<td>${cell.render()}</td>`)
                     .join('')
                 return `<tr>${renderedRow}</tr>`
             })

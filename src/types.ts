@@ -36,23 +36,39 @@ export interface LessonConfig {
 }
 
 export interface LessonGroup {
-    readonly lesson_type: 'Agentic' | 'Character' | 'Vocabulary'
     readonly name: string
     readonly lesson_map: Record<string, LessonConfig>
     readonly lesson_order: Array<string>
 }
 
+export interface CharacterLearningLessonConfig {
+    readonly name: string
+    readonly character_path: string
+    readonly character_table_path: string
+}
+
+export interface CharacterLearningLesson {
+    readonly name: string
+    readonly lesson_map: Record<string, CharacterLearningLessonConfig>
+    readonly lesson_order: Array<string>
+}
+
 export type LessonType =
-    | 'Agentic'
-    | { Character: LessonGroup }
-    | { Vocabulary: LessonGroup }
+    | 'AgenticExercise'
+    | { CharacterExercise: LessonGroup }
+    | { VocabularyExercise: LessonGroup }
+    | { CharacterLearning: CharacterLearningLesson }
 
 export interface Config {
     readonly group_map: Record<string, LessonType>
     readonly group_order: Array<string>
 }
 
-export type LessonTypeEnum = 'AGENTIC' | 'CHARACTER' | 'VOCABULARY'
+export type LessonTypeEnum =
+    | 'AGENTIC_EXERCISE'
+    | 'CHARACTER_EXERCISE'
+    | 'VOCABULARY_EXERCISE'
+    | 'CHARACTER_LEARNING_LESSON'
 
 export interface AgenticLesson {
     readonly japanese_text: string
@@ -65,4 +81,16 @@ export interface Translation {
     readonly mistakes: string
     readonly suggestions: string
     readonly mark: number
+}
+
+export interface CharacterEntryRow {
+    readonly col1: CharacterEntry | undefined
+    readonly col2: CharacterEntry | undefined
+    readonly col3: CharacterEntry | undefined
+    readonly col4: CharacterEntry | undefined
+    readonly col5: CharacterEntry | undefined
+}
+
+export interface CharacterEntryTable {
+    rows: Array<CharacterEntryRow>
 }

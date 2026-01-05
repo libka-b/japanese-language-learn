@@ -1,8 +1,17 @@
 use crate::agent::{ApiKeyError, LessonData, Translation, generate_lesson, validate_translation};
-use crate::manager::{CharacterEntry, EntryCounter, JsonCompatibleStats, VocabularyEntry};
+use crate::manager::{CharacterEntry, CharacterEntryTable, EntryCounter, JsonCompatibleStats, VocabularyEntry};
 use crate::AppState;
 use std::collections::HashMap;
 use tauri::{AppHandle, State};
+
+#[tauri::command]
+pub fn get_character_table(
+    handle: AppHandle,
+    app_state: State<AppState>,
+    lesson_name: &str,
+) -> CharacterEntryTable {
+    app_state.manager.lock().unwrap().get_character_table(handle, lesson_name)
+}
 
 #[tauri::command]
 pub fn next_character_lesson_entry(

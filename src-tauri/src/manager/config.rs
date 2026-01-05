@@ -3,9 +3,17 @@ use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum LessonType {
-    Agentic,
-    Character(LessonGroup),
-    Vocabulary(LessonGroup),
+    AgenticExercise,
+    CharacterExercise(LessonGroup),
+    VocabularyExercise(LessonGroup),
+    CharacterLearning(CharacterLearningLesson),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CharacterLearningLessonConfig {
+    pub name: String,
+    pub character_path: String,
+    pub character_table_path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -18,6 +26,13 @@ impl LessonConfig {
     pub fn stats_path(&self) -> String {
         format!("{}-stats.json", self.name)
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CharacterLearningLesson {
+    pub name: String,
+    pub lesson_map: HashMap<String, CharacterLearningLessonConfig>,
+    pub lesson_order: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

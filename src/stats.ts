@@ -8,11 +8,12 @@ import type {
 import { createMenu } from './menu'
 import { RendererBuilder } from './rendering/renderer'
 import { TableBuilder, DivBuilder } from './rendering/builder'
+import { Paragraph } from './rendering/model'
 
 async function getStats(
     lessonTypeEnum: LessonTypeEnum,
 ): Promise<Record<string, Stats<CharacterEntry | VocabularyEntry>>> {
-    if (lessonTypeEnum == 'CHARACTER') {
+    if (lessonTypeEnum == 'CHARACTER_EXERCISE') {
         return await invoke('get_character_entry_stats')
     } else {
         return await invoke('get_vocabulary_entry_stats')
@@ -43,8 +44,8 @@ export async function showStats(
             .sort((a, b) => b.count - a.count)
             .forEach((entry) =>
                 tableBuilder.addRow([
-                    entry.entry.japanese,
-                    entry.count.toString(),
+                    new Paragraph({ text: entry.entry.japanese }),
+                    new Paragraph({ text: entry.count.toString() }),
                 ]),
             )
 

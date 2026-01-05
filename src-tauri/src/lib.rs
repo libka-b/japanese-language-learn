@@ -18,6 +18,7 @@ use lesson::{
     generate_agentic_lesson,
     validate_translation_lesson,
     set_api_key,
+    get_character_table,
 };
 use manager::{Config, Router};
 use std::sync::{Mutex, RwLock};
@@ -102,6 +103,7 @@ pub fn run() {
             generate_agentic_lesson,
             validate_translation_lesson,
             set_api_key,
+            get_character_table,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

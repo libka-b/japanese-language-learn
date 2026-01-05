@@ -5,22 +5,36 @@ import { ConfigManager } from './config_manager'
 import { generateAgenticLesson } from './agentic_lesson'
 import { RendererBuilder } from './rendering/renderer'
 import { DivBuilder } from './rendering/builder'
-import type { LessonType, LessonGroup, LessonTypeEnum } from './types'
+import { getCharacterLearningLesson } from './character_learning_lesson'
+import type {
+    LessonType,
+    LessonGroup,
+    LessonTypeEnum,
+    CharacterLearningLesson,
+} from './types'
 
-function isAgentic(lessonType: LessonType): lessonType is 'Agentic' {
-    return lessonType === 'Agentic'
+function isAgenticExercise(
+    lessonType: LessonType,
+): lessonType is 'AgenticExercise' {
+    return lessonType === 'AgenticExercise'
 }
 
-function isCharacter(
+function isCharacterExercise(
     lessonType: LessonType,
-): lessonType is { Character: LessonGroup } {
-    return typeof lessonType === 'object' && 'Character' in lessonType
+): lessonType is { CharacterExercise: LessonGroup } {
+    return typeof lessonType === 'object' && 'CharacterExercise' in lessonType
 }
 
-function isVocabulary(
+function isVocabularyExercise(
     lessonType: LessonType,
-): lessonType is { Vocabulary: LessonGroup } {
-    return typeof lessonType === 'object' && 'Vocabulary' in lessonType
+): lessonType is { VocabularyExercise: LessonGroup } {
+    return typeof lessonType === 'object' && 'VocabularyExercise' in lessonType
+}
+
+function isCharacterLearningLesson(
+    lessonType: LessonType,
+): lessonType is { CharacterLearning: CharacterLearningLesson } {
+    return typeof lessonType === 'object' && 'CharacterLearning' in lessonType
 }
 
 export async function createGroupMenu(
@@ -34,7 +48,20 @@ export async function createGroupMenu(
 
     configManager.getGroupOrder().forEach((groupName) => {
         const lessonObj = configManager.getLessonType(groupName)
-        if (isAgentic(lessonObj)) {
+
+        if (isCharacterLearningLesson(lessonObj)) {
+            divBuilder.addButton({
+                id: 'character-learning-lesson',
+                text: 'Character Leaning Lesson',
+                callback: async (): Promise<void> =>
+                    await callback(
+                        lessonObj.CharacterLearning.lesson_order,
+                        'CHARACTER_LEARNING_LESSON',
+                    ),
+            })
+        }
+
+        if (isAgenticExercise(lessonObj)) {
             divBuilder.addButton({
                 id: 'agentic-lesson',
                 text: 'Agentic lesson',
@@ -43,26 +70,26 @@ export async function createGroupMenu(
             })
         }
 
-        if (isCharacter(lessonObj)) {
+        if (isCharacterExercise(lessonObj)) {
             divBuilder.addButton({
                 id: groupName,
                 text: `${capitalize(groupName)} group`,
                 callback: async (): Promise<void> =>
                     await callback(
-                        lessonObj.Character.lesson_order,
-                        'CHARACTER',
+                        lessonObj.CharacterExercise.lesson_order,
+                        'CHARACTER_EXERCISE',
                     ),
             })
         }
 
-        if (isVocabulary(lessonObj)) {
+        if (isVocabularyExercise(lessonObj)) {
             divBuilder.addButton({
                 id: groupName,
                 text: `${capitalize(groupName)} group`,
                 callback: async (): Promise<void> =>
                     await callback(
-                        lessonObj.Vocabulary.lesson_order,
-                        'VOCABULARY',
+                        lessonObj.VocabularyExercise.lesson_order,
+                        'VOCABULARY_EXERCISE',
                     ),
             })
         }
@@ -91,12 +118,16 @@ export async function createLessonMenu(
             id: lessonName,
             text: `${capitalize(lessonName)} lesson`,
             callback: async (): Promise<void> => {
-                if (lessonTypeEnum == 'CHARACTER') {
+                if (lessonTypeEnum == 'CHARACTER_EXERCISE') {
                     await getNextCharacterExercise(lessonName)
                 }
 
-                if (lessonTypeEnum == 'VOCABULARY') {
+                if (lessonTypeEnum == 'VOCABULARY_EXERCISE') {
                     await getNextVocabularyExercise(lessonName)
+                }
+
+                if (lessonTypeEnum == 'CHARACTER_LEARNING_LESSON') {
+                    await getCharacterLearningLesson(lessonName)
                 }
             },
         })

@@ -1,9 +1,9 @@
 use crate::manager::{Counter, EntryCounter, Generator, JsonCompatibleStats, Stats};
-use csv::Reader;
 use std::collections::HashSet;
 use tauri::{path::BaseDirectory, AppHandle, Manager as TauriManager};
 use serde::{Serialize, de::DeserializeOwned};
 use std::hash::Hash;
+use crate::manager::utils::load_csv_entries;
 
 pub struct Manager<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> {
     resource_path: String,
@@ -71,7 +71,9 @@ impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T
     }
 
     fn load_generator(&mut self, handle: AppHandle) -> Result<Generator<T>, String> {
-        let entries = self.load_entries(handle.clone());
+        let entries: HashSet<T> = load_csv_entries::<T>(&self.resource_path, handle.clone())
+            .into_iter()
+            .collect();
         let stats = self.get_stats(handle);
         let wrong: HashSet<T> = stats.wrong.keys().cloned().collect();
         let entries_len = entries.len() as u32;
@@ -91,21 +93,6 @@ impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T
             .unwrap_or_else(|_| JsonCompatibleStats::from_stats(Stats::new()));
 
         json_stats.to_stats()
-    }
-
-    fn load_entries(&self, handle: AppHandle) -> HashSet<T> {
-        let resource_path = handle
-            .path()
-            .resolve(&self.resource_path, BaseDirectory::Resource)
-            .unwrap_or_else(|_| {
-                panic!("Unable to resolve resource path `{}`.", self.resource_path)
-            });
-
-        let mut reader = Reader::from_path(resource_path).expect("Unable tp read CSV file");
-
-        let records: Vec<T> = reader.deserialize().filter_map(Result::ok).collect();
-
-        records.into_iter().collect()
     }
 }
 

@@ -34,7 +34,8 @@
       "resources/hiragana-plus.csv",
       "resources/katakana.csv",
       "resources/katakana-plus.csv",
-      "resources/hiragana-vocabulary.csv"
+      "resources/hiragana-vocabulary.csv",
+      "resources/hiragana-table.csv"
     ]
   }
 }
