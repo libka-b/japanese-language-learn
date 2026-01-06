@@ -38,15 +38,15 @@ export async function showStats(
         const success = (1 - stats.incorrect / stats.total) * 100
         const fail = (stats.incorrect / stats.total) * 100
 
-        const tableBuilder = new TableBuilder(['Character', 'Mistakes'])
+        const tableBuilder = new TableBuilder([], 'Character', 'Mistakes')
 
         stats.wrong
             .sort((a, b) => b.count - a.count)
             .forEach((entry) =>
-                tableBuilder.addRow([
+                tableBuilder.addRow(
                     new Paragraph({ text: entry.entry.japanese }),
                     new Paragraph({ text: entry.count.toString() }),
-                ]),
+                ),
             )
 
         rendererBuilder

@@ -35,16 +35,16 @@ export async function getCharacterLearningLesson(
         { lessonName: lessonName },
     )
 
-    const tableBuilder = new TableBuilder([])
+    const tableBuilder = new TableBuilder(['character-learning-table'])
 
     characterEntryTable.rows.forEach((row) => {
-        tableBuilder.addRow([
+        tableBuilder.addRow(
             divFromCharacterEntry(row.col1),
             divFromCharacterEntry(row.col2),
             divFromCharacterEntry(row.col3),
             divFromCharacterEntry(row.col4),
             divFromCharacterEntry(row.col5),
-        ])
+        )
     })
 
     new RendererBuilder()

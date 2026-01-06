@@ -119,18 +119,21 @@ export class FormBuilder extends ContainerBuilder<Form> {
 export class TableBuilder implements Builder<Table> {
     private headers: Array<string>
     private rows: Array<Array<IElement>> = []
+    private classes: Array<string> | undefined
 
-    constructor(headers: Array<string>) {
+    constructor(classes: Array<string>, ...headers: string[]) {
         this.headers = headers
+        this.classes = classes
     }
 
-    addRow(row: Array<IElement>): TableBuilder {
+    addRow(...row: IElement[]): TableBuilder {
         this.rows.push(row)
         return this
     }
 
     build(): Table {
         return new Table({
+            classes: this.classes,
             headers: this.headers,
             rows: this.rows,
         })

@@ -150,6 +150,7 @@ export class Form extends AbstractElement<FormOptions> {
 }
 
 export interface TableOptions extends IOptions {
+    readonly classes?: Array<string>
     readonly headers: Array<string>
     readonly rows: Array<Array<IElement>>
 }
@@ -167,6 +168,9 @@ export class Table extends AbstractElement<TableOptions> {
         const renderedHeaders = this.options.headers
             .map((header) => `<th>${header}</th>`)
             .join('')
-        return `<table><tr>${renderedHeaders}</tr>${renderedRows}</table>`
+        const classes = this.options.classes
+            ? ` class='${this.options.classes.join(' ')}'`
+            : ''
+        return `<table${classes}><tr>${renderedHeaders}</tr>${renderedRows}</table>`
     }
 }

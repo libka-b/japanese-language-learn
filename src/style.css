@@ -111,6 +111,30 @@ button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
+.character-learning-table {
+    margin: 0 auto;
+    background-color: white;
+    border-collapse: collapse;
+
+    td {
+        border: 1px solid black;
+    }
+
+    td h1 {
+        font-size: 2.5em;
+        margin-top: 0.1em;
+        margin-bottom: 0.1em;
+        color: black;
+    }
+
+    td h3 {
+        font-size: 0.8em;
+        margin-top: 0.1em;
+        margin-bottom: 0.1em;
+        color: black;
+    }
+}
+
 @media (prefers-color-scheme: light) {
     :root {
         color: #213547;
