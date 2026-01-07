@@ -8,11 +8,16 @@ group_map:
     name: Character Learning
     lesson_order:
       - hiragana
+      - katakana
     lesson_map:
       hiragana:
         name: hiragana
         character_path: resources/hiragana.csv
         character_table_path: resources/hiragana-table.csv
+      katakana:
+        name: katakana
+        character_path: resources/katakana.csv
+        character_table_path: resources/katakana-table.csv
   agentic: !AgenticExercise
   character: !CharacterExercise
     name: Character lessons
