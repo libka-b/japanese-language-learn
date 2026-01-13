@@ -8,6 +8,7 @@ import {
     Form,
     Table,
     Input,
+    Svg,
 } from './model'
 import type {
     ButtonOptions,
@@ -68,23 +69,35 @@ export abstract class ContainerBuilder<T> implements Builder<T> {
         return this
     }
 
+    addSvg(svg: Svg): ContainerBuilder<T> {
+        this.elements.push(svg)
+        return this
+    }
+
     abstract build(): T
+}
+
+export interface DivBuilderOptions {
+    readonly id: string
+    readonly classes?: Array<string>
+    readonly styleOptions?: string
+    readonly callback?: () => Promise<void>
 }
 
 export class DivBuilder extends ContainerBuilder<Div> {
     private id: string
     private classes: Array<string>
     private styleOptions: undefined | string
+    private callback: undefined | (() => Promise<void>)
 
-    constructor(
-        id: string,
-        classes: Array<string>,
-        styleOptions?: undefined | string,
-    ) {
+    constructor(divBuilderOptions: DivBuilderOptions) {
         super()
-        this.id = id
-        this.classes = classes
-        this.styleOptions = styleOptions
+        this.id = divBuilderOptions.id
+        this.classes = divBuilderOptions.classes
+            ? divBuilderOptions.classes
+            : []
+        this.styleOptions = divBuilderOptions.styleOptions
+        this.callback = divBuilderOptions.callback
     }
 
     build(): Div {
@@ -93,6 +106,7 @@ export class DivBuilder extends ContainerBuilder<Div> {
             classes: this.classes,
             styleOptions: this.styleOptions,
             elements: this.elements,
+            callback: this.callback,
         })
     }
 }

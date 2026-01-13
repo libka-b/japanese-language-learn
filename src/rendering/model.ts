@@ -173,4 +173,26 @@ export class Table extends AbstractElement<TableOptions> {
             : ''
         return `<table${classes}><tr>${renderedHeaders}</tr>${renderedRows}</table>`
     }
+
+    getCallbacks(): Array<() => Promise<void>> {
+        const localCallbacks = this.options.callback
+            ? [this.options.callback]
+            : []
+        const callbacks = this.options.rows
+            .flat()
+            .flatMap((element) => element.getCallbacks())
+
+        callbacks.push(...localCallbacks)
+        return callbacks
+    }
+}
+
+export interface SvgOptions extends IOptions {
+    readonly rawSvg: string
+}
+
+export class Svg extends AbstractElement<SvgOptions> {
+    render(): string {
+        return this.options.rawSvg
+    }
 }

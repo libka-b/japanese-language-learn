@@ -53,25 +53,28 @@ export async function showStats(
             .addHeader2({ text: `${lessonName} statistics` })
             .addParagraph({ text: `Success rate: ${success}%` })
             .addDiv(
-                new DivBuilder('success-bar', ['success-bar'])
+                new DivBuilder({ id: 'success-bar', classes: ['success-bar'] })
                     .addDiv(
-                        new DivBuilder(
-                            'success',
-                            ['success'],
-                            `width: ${success}%`,
-                        ).build(),
+                        new DivBuilder({
+                            id: 'success',
+                            classes: ['success'],
+                            styleOptions: `width: ${success}%`,
+                        }).build(),
                     )
                     .addDiv(
-                        new DivBuilder(
-                            'fail',
-                            ['fail'],
-                            `width: ${fail}%`,
-                        ).build(),
+                        new DivBuilder({
+                            id: 'fail',
+                            classes: ['fail'],
+                            styleOptions: `width: ${fail}%`,
+                        }).build(),
                     )
                     .build(),
             )
             .addDiv(
-                new DivBuilder('details', ['details', 'hidden'])
+                new DivBuilder({
+                    id: 'details',
+                    classes: ['details', 'hidden'],
+                })
                     .addTable(tableBuilder.build())
                     .build(),
             )

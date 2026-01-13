@@ -3,7 +3,8 @@ import { createMenu } from './menu'
 import type { CharacterEntry, CharacterEntryTable } from './types'
 import { RendererBuilder } from './rendering/renderer'
 import { DivBuilder, TableBuilder } from './rendering/builder'
-import { Div } from './rendering/model'
+import { Div, Svg } from './rendering/model'
+import { StrokeAnimator } from './stroke/stroke_animator'
 
 function emptyDiv(): Div {
     return new Div({
@@ -16,15 +17,51 @@ function emptyDiv(): Div {
 
 function divFromCharacterEntry(
     characterEntry: CharacterEntry | undefined,
+    lessonName: string,
 ): Div {
     if (!characterEntry) {
         return emptyDiv()
     }
 
-    return new DivBuilder('', [])
+    return new DivBuilder({
+        id: characterEntry.japanese,
+        callback: async (): Promise<void> => {
+            document
+                .getElementById(characterEntry.japanese)
+                ?.addEventListener('click', () =>
+                    callback(lessonName, characterEntry.japanese),
+                )
+        },
+    })
         .addHeader1({ text: characterEntry.japanese })
         .addHeader3({ text: characterEntry.english })
         .build()
+}
+
+async function callback(lessonName: string, character: string): Promise<void> {
+    const response = await fetch(`/hiragana/${character}.svg`)
+    const svgText = await response.text()
+
+    console.log(`SVG Text: ${svgText}`)
+
+    new RendererBuilder()
+        .addDiv(
+            new DivBuilder({ id: '', classes: ['svg'] })
+                .addSvg(new Svg({ rawSvg: svgText }))
+                .build(),
+        )
+        .addButton({
+            id: 'back',
+            text: 'Back',
+            callback: async () => getCharacterLearningLesson(lessonName),
+        })
+        .build()
+        .renderAndRegisterCallbacks()
+
+    const svgElement = document.querySelector('svg') as SVGSVGElement
+    const animator = new StrokeAnimator(svgElement)
+
+    animator.animateAll(800, 400)
 }
 
 export async function getCharacterLearningLesson(
@@ -39,11 +76,11 @@ export async function getCharacterLearningLesson(
 
     characterEntryTable.rows.forEach((row) => {
         tableBuilder.addRow(
-            divFromCharacterEntry(row.col1),
-            divFromCharacterEntry(row.col2),
-            divFromCharacterEntry(row.col3),
-            divFromCharacterEntry(row.col4),
-            divFromCharacterEntry(row.col5),
+            divFromCharacterEntry(row.col1, lessonName),
+            divFromCharacterEntry(row.col2, lessonName),
+            divFromCharacterEntry(row.col3, lessonName),
+            divFromCharacterEntry(row.col4, lessonName),
+            divFromCharacterEntry(row.col5, lessonName),
         )
     })
 

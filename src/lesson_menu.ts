@@ -44,7 +44,7 @@ export async function createGroupMenu(
         lessonTypeEnum: LessonTypeEnum,
     ) => Promise<void>,
 ): Promise<void> {
-    const divBuilder = new DivBuilder('menu', ['menu'])
+    const divBuilder = new DivBuilder({ id: 'menu', classes: ['menu'] })
 
     configManager.getGroupOrder().forEach((groupName) => {
         const lessonObj = configManager.getLessonType(groupName)
@@ -111,7 +111,7 @@ export async function createLessonMenu(
     lessonOrder: Array<string>,
     lessonTypeEnum: LessonTypeEnum,
 ): Promise<void> {
-    const divBuilder = new DivBuilder('menu', ['menu'])
+    const divBuilder = new DivBuilder({ id: 'menu', classes: ['menu'] })
 
     lessonOrder.forEach((lessonName) => {
         divBuilder.addButton({

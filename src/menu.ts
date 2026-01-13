@@ -8,7 +8,7 @@ import { DivBuilder } from './rendering/builder'
 export function createMenu(): void {
     new RendererBuilder()
         .addDiv(
-            new DivBuilder('main-menu', ['menu'])
+            new DivBuilder({ id: 'main-menu', classes: ['menu'] })
                 .addButton({
                     id: 'lessons',
                     text: 'Go to lessons',
