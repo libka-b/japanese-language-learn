@@ -39,10 +39,8 @@ function divFromCharacterEntry(
 }
 
 async function callback(lessonName: string, character: string): Promise<void> {
-    const response = await fetch(`/hiragana/${character}.svg`)
+    const response = await fetch(`/${lessonName}/${character}.svg`)
     const svgText = await response.text()
-
-    console.log(`SVG Text: ${svgText}`)
 
     new RendererBuilder()
         .addDiv(
