@@ -3,7 +3,7 @@ A desktop application for learning Japanese language. Built with [Tauri](https:/
 Currently lacks distribution via built binaries. To run the application, run the following commands (from the root directory):
 
 ```
-npm run build
+npm run build:all
 cd src-tauri
 cargo run
 ```

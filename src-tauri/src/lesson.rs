@@ -1,5 +1,7 @@
-use crate::agent::{ApiKeyError, LessonData, Translation, generate_lesson, validate_translation};
-use crate::manager::{CharacterEntry, CharacterEntryTable, EntryCounter, JsonCompatibleStats, VocabularyEntry};
+use crate::agent::{generate_lesson, validate_translation, ApiKeyError, LessonData, Translation};
+use crate::manager::{
+    CharacterEntry, CharacterEntryTable, EntryCounter, JsonCompatibleStats, VocabularyEntry,
+};
 use crate::AppState;
 use std::collections::HashMap;
 use tauri::{AppHandle, State};
@@ -10,7 +12,11 @@ pub fn get_character_table(
     app_state: State<AppState>,
     lesson_name: &str,
 ) -> CharacterEntryTable {
-    app_state.manager.lock().unwrap().get_character_table(handle, lesson_name)
+    app_state
+        .manager
+        .lock()
+        .unwrap()
+        .get_character_table(handle, lesson_name)
 }
 
 #[tauri::command]
@@ -40,7 +46,10 @@ pub fn next_vocabulary_lesson_entry(
 }
 
 #[tauri::command]
-pub fn generate_agentic_lesson(handle: AppHandle, app_state: State<AppState>) -> Result<LessonData, ApiKeyError> {
+pub fn generate_agentic_lesson(
+    handle: AppHandle,
+    app_state: State<AppState>,
+) -> Result<LessonData, ApiKeyError> {
     let api_key = app_state.get_api_key(handle)?;
 
     Ok(generate_lesson(api_key).unwrap())
@@ -64,7 +73,12 @@ pub fn set_api_key(app_state: State<AppState>, key: String) {
 }
 
 #[tauri::command]
-pub fn add_correct_character_entry(handle: AppHandle, app_state: State<AppState>, lesson_name: &str, entry: CharacterEntry) {
+pub fn add_correct_character_entry(
+    handle: AppHandle,
+    app_state: State<AppState>,
+    lesson_name: &str,
+    entry: CharacterEntry,
+) {
     app_state
         .manager
         .lock()
@@ -73,14 +87,18 @@ pub fn add_correct_character_entry(handle: AppHandle, app_state: State<AppState>
 }
 
 #[tauri::command]
-pub fn add_correct_vocabulary_entry(handle: AppHandle, app_state: State<AppState>, lesson_name: &str, entry: VocabularyEntry) {
+pub fn add_correct_vocabulary_entry(
+    handle: AppHandle,
+    app_state: State<AppState>,
+    lesson_name: &str,
+    entry: VocabularyEntry,
+) {
     app_state
         .manager
         .lock()
         .unwrap()
         .add_correct_vocabulary_entry(handle, lesson_name, entry);
 }
-
 
 #[tauri::command]
 pub fn add_incorrect_character_entry(
@@ -142,10 +160,13 @@ pub fn get_vocabulary_entry_stats(
 
 #[tauri::command]
 pub fn exit_app(app_handle: tauri::AppHandle, app_state: State<AppState>) {
-    app_state.manager.lock().unwrap().save_stats(app_handle.clone());
-    match app_state.api_key.read().unwrap().as_ref() {
-        Some(key) => key.save_key(app_handle).unwrap(),
-        None => {},
+    app_state
+        .manager
+        .lock()
+        .unwrap()
+        .save_stats(app_handle.clone());
+    if let Some(key) = app_state.api_key.read().unwrap().as_ref() {
+        key.save_key(app_handle).unwrap()
     }
 
     std::process::exit(0);

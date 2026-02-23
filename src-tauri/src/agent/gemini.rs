@@ -1,8 +1,10 @@
-use serde::de::DeserializeOwned;
-use crate::agent::ApiKey;
-use crate::agent::request::{Content, GeminiRequest, Part, SystemInstruction, GenerationConfig, ResponseSchema};
+use crate::agent::request::{
+    Content, GeminiRequest, GenerationConfig, Part, ResponseSchema, SystemInstruction,
+};
 use crate::agent::response::GeminiResponse;
 use crate::agent::types::GeminiSchema;
+use crate::agent::ApiKey;
+use serde::de::DeserializeOwned;
 
 pub fn query_gemini<T: GeminiSchema + DeserializeOwned>(
     api_key: ApiKey,
@@ -10,21 +12,13 @@ pub fn query_gemini<T: GeminiSchema + DeserializeOwned>(
     system_instruction: String,
 ) -> Result<T, Box<dyn std::error::Error>> {
     let request = GeminiRequest {
-        contents: vec![
-            Content {
-                parts: vec![
-                    Part {
-                        text: prompt,
-                    },
-                ],
-            },
-        ],
+        contents: vec![Content {
+            parts: vec![Part { text: prompt }],
+        }],
         system_instruction: SystemInstruction {
-            parts: vec![
-                Part {
-                    text: system_instruction,
-                },
-            ],
+            parts: vec![Part {
+                text: system_instruction,
+            }],
         },
         generation_config: GenerationConfig {
             response_mime_type: "application/json".to_string(),

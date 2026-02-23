@@ -1,6 +1,8 @@
 use crate::manager::character_learning_manager::CharacterLearningManager;
-use crate::manager::{CharacterEntry, CharacterEntryTable, Config, EntryCounter, Manager, Stats, VocabularyEntry};
 use crate::manager::config::LessonType;
+use crate::manager::{
+    CharacterEntry, CharacterEntryTable, Config, EntryCounter, Manager, Stats, VocabularyEntry,
+};
 use std::collections::HashMap;
 use tauri::AppHandle;
 
@@ -28,10 +30,13 @@ impl Router {
                         }
                         character_manager_map.insert(
                             lesson_config.name.to_string(),
-                            Manager::new(lesson_config.path.to_string(), lesson_config.stats_path()),
+                            Manager::new(
+                                lesson_config.path.to_string(),
+                                lesson_config.stats_path(),
+                            ),
                         );
-                   }
-                },
+                    }
+                }
                 LessonType::VocabularyExercise(group) => {
                     for lesson_config in group.lesson_map.values() {
                         if vocabulary_manager_map.contains_key(&lesson_config.name) {
@@ -42,11 +47,14 @@ impl Router {
                         }
                         vocabulary_manager_map.insert(
                             lesson_config.name.to_string(),
-                            Manager::new(lesson_config.path.to_string(), lesson_config.stats_path()),
+                            Manager::new(
+                                lesson_config.path.to_string(),
+                                lesson_config.stats_path(),
+                            ),
                         );
-                   }
-                },
-                LessonType::AgenticExercise => {},
+                    }
+                }
+                LessonType::AgenticExercise => {}
                 LessonType::CharacterLearning(group) => {
                     for lesson_config in group.lesson_map.values() {
                         character_learning_manager_map.insert(
@@ -58,60 +66,104 @@ impl Router {
             }
         }
 
-        Ok(Self { character_manager_map, vocabulary_manager_map, character_learning_manager_map })
+        Ok(Self {
+            character_manager_map,
+            vocabulary_manager_map,
+            character_learning_manager_map,
+        })
     }
 
     pub fn get_character_table(&mut self, handle: AppHandle, name: &str) -> CharacterEntryTable {
         self.character_learning_manager_map
             .get_mut(name)
-            .expect(&format!("Unable to load manager map for name `{}`", name))
+            .unwrap_or_else(|| panic!("Unable to load manager map for name `{}`", name))
             .get_character_entry_table(handle)
     }
 
-    pub fn get_next_character_entry(&mut self, handle: AppHandle, name: &str) -> Option<EntryCounter<CharacterEntry>> {
-        self.character_manager_map.get_mut(name).unwrap().get_next(handle)
+    pub fn get_next_character_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+    ) -> Option<EntryCounter<CharacterEntry>> {
+        self.character_manager_map
+            .get_mut(name)
+            .unwrap()
+            .get_next(handle)
     }
 
-    pub fn get_next_vocabulary_entry(&mut self, handle: AppHandle, name: &str) -> Option<EntryCounter<VocabularyEntry>> {
-        self.vocabulary_manager_map.get_mut(name).unwrap().get_next(handle)
+    pub fn get_next_vocabulary_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+    ) -> Option<EntryCounter<VocabularyEntry>> {
+        self.vocabulary_manager_map
+            .get_mut(name)
+            .unwrap()
+            .get_next(handle)
     }
 
-    pub fn get_character_entry_stats(&mut self, handle: AppHandle) -> HashMap<String, Stats<CharacterEntry>> {
+    pub fn get_character_entry_stats(
+        &mut self,
+        handle: AppHandle,
+    ) -> HashMap<String, Stats<CharacterEntry>> {
         self.character_manager_map
             .iter_mut()
             .map(|(name, manager)| (name.clone(), manager.get_stats(handle.clone())))
             .collect()
     }
 
-    pub fn get_vocabulary_entry_stats(&mut self, handle: AppHandle) -> HashMap<String, Stats<VocabularyEntry>> {
+    pub fn get_vocabulary_entry_stats(
+        &mut self,
+        handle: AppHandle,
+    ) -> HashMap<String, Stats<VocabularyEntry>> {
         self.vocabulary_manager_map
             .iter_mut()
             .map(|(name, manager)| (name.clone(), manager.get_stats(handle.clone())))
             .collect()
     }
 
-    pub fn add_correct_character_entry(&mut self, handle: AppHandle, name: &str, entry: CharacterEntry) {
+    pub fn add_correct_character_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+        entry: CharacterEntry,
+    ) {
         self.character_manager_map
             .get_mut(name)
             .unwrap()
             .add_correct(handle, entry);
     }
 
-    pub fn add_correct_vocabulary_entry(&mut self, handle: AppHandle, name: &str, entry: VocabularyEntry) {
+    pub fn add_correct_vocabulary_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+        entry: VocabularyEntry,
+    ) {
         self.vocabulary_manager_map
             .get_mut(name)
             .unwrap()
             .add_correct(handle, entry);
     }
 
-    pub fn add_incorrect_character_entry(&mut self, handle: AppHandle, name: &str, entry: CharacterEntry) {
+    pub fn add_incorrect_character_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+        entry: CharacterEntry,
+    ) {
         self.character_manager_map
             .get_mut(name)
             .unwrap()
             .add_incorrect(handle, entry);
     }
 
-    pub fn add_incorrect_vocabulary_entry(&mut self, handle: AppHandle, name: &str, entry: VocabularyEntry) {
+    pub fn add_incorrect_vocabulary_entry(
+        &mut self,
+        handle: AppHandle,
+        name: &str,
+        entry: VocabularyEntry,
+    ) {
         self.vocabulary_manager_map
             .get_mut(name)
             .unwrap()

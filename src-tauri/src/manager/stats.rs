@@ -1,11 +1,11 @@
 use crate::manager::{EntryCount, Stats};
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 use std::path::PathBuf;
 use std::{collections::HashMap, fs};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
-use std::hash::Hash;
-use serde::de::DeserializeOwned;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(bound = "")]
@@ -15,7 +15,7 @@ pub struct JsonCompatibleStats<T: DeserializeOwned + Serialize + Clone + Partial
     pub wrong: Vec<EntryCount<T>>,
 }
 
-impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> JsonCompatibleStats<T> {
+impl<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> JsonCompatibleStats<T> {
     pub fn from_stats(stats: Stats<T>) -> Self {
         Self {
             total: stats.total,
@@ -73,7 +73,7 @@ impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> JsonCompa
     }
 }
 
-impl <T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Stats<T> {
+impl<T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Stats<T> {
     pub fn new() -> Self {
         Self {
             total: 0,

@@ -6,19 +6,10 @@ mod manager;
 use agent::{ApiKey, ApiKeyError};
 use config::get_config;
 use lesson::{
-    add_correct_character_entry,
-    add_correct_vocabulary_entry,
-    add_incorrect_character_entry,
-    add_incorrect_vocabulary_entry,
-    exit_app,
-    get_character_entry_stats,
-    get_vocabulary_entry_stats,
-    next_character_lesson_entry,
-    next_vocabulary_lesson_entry,
-    generate_agentic_lesson,
-    validate_translation_lesson,
-    set_api_key,
-    get_character_table,
+    add_correct_character_entry, add_correct_vocabulary_entry, add_incorrect_character_entry,
+    add_incorrect_vocabulary_entry, exit_app, generate_agentic_lesson, get_character_entry_stats,
+    get_character_table, get_vocabulary_entry_stats, next_character_lesson_entry,
+    next_vocabulary_lesson_entry, set_api_key, validate_translation_lesson,
 };
 use manager::{Config, Router};
 use std::sync::{Mutex, RwLock};

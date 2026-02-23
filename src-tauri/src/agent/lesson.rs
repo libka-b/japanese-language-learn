@@ -1,8 +1,8 @@
-use rand::seq::IndexedRandom;
-use rand::rng;
-use crate::agent::ApiKey;
 use crate::agent::gemini::query_gemini;
 use crate::agent::types::{LessonData, Translation};
+use crate::agent::ApiKey;
+use rand::rng;
+use rand::seq::IndexedRandom;
 
 const SYSTEM_INSTRUCTION: &str = r#"You are an AI agent called from application meant for learning Japanese. 
 Your task is to generate Japanese text for users to translate and then, 
@@ -33,7 +33,11 @@ pub fn generate_lesson(api_key: ApiKey) -> Result<LessonData, Box<dyn std::error
     )
 }
 
-pub fn validate_translation(original: String, translation: String, api_key: ApiKey) -> Result<Translation, Box<dyn std::error::Error>> {
+pub fn validate_translation(
+    original: String,
+    translation: String,
+    api_key: ApiKey,
+) -> Result<Translation, Box<dyn std::error::Error>> {
     query_gemini(
         api_key,
         format!(

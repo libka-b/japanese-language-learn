@@ -4,11 +4,15 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "lint": "eslint . --ext .ts,.tsx",
-        "format": "prettier --write .",
         "dev": "vite",
-        "build": "npm run lint && npm run format && rm -rf ./dist && tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint": "eslint . --ext .ts,.tsx && prettier --check .",
+        "lint:rust": "cd src-tauri && cargo fmt --all -- --check && cargo clippy -- -D warnings",
+        "format:rust": "cd src-tauri && cargo fmt --all",
+        "test:rust": "cd src-tauri && cargo test",
+        "build:frontend": "npm run lint && rm -rf ./dist && tsc && vite build",
+        "build:backend": "npm run lint:rust && npm run test:rust && cd src-tauri && cargo build --release",
+        "build:all": "npm run build:frontend && npm run build:backend"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2.9.4",

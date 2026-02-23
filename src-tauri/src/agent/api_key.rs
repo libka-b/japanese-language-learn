@@ -23,7 +23,9 @@ impl ApiKey {
 
     pub fn save_key(&self, handle: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         let json = serde_json::to_string_pretty(self)?;
-        let path = handle.path().resolve(PATH, tauri::path::BaseDirectory::AppData)?;
+        let path = handle
+            .path()
+            .resolve(PATH, tauri::path::BaseDirectory::AppData)?;
 
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
@@ -36,7 +38,9 @@ impl ApiKey {
     }
 
     pub fn load_key(handle: tauri::AppHandle) -> Result<Self, Box<dyn std::error::Error>> {
-        let path = handle.path().resolve(PATH, tauri::path::BaseDirectory::AppData)?;
+        let path = handle
+            .path()
+            .resolve(PATH, tauri::path::BaseDirectory::AppData)?;
         let json = std::fs::read_to_string(path)?;
         let api_key: Self = serde_json::from_str(&json)?;
         Ok(api_key)

@@ -1,6 +1,6 @@
+use crate::manager::{Counter, EntryCounter};
 use serde::de::DeserializeOwned;
 use std::{collections::HashSet, hash::Hash};
-use crate::manager::{Counter, EntryCounter};
 
 pub struct Generator<T: DeserializeOwned + Clone + PartialEq + Eq + Hash> {
     entries: HashSet<T>,
@@ -9,12 +9,8 @@ pub struct Generator<T: DeserializeOwned + Clone + PartialEq + Eq + Hash> {
     counter: Counter,
 }
 
-impl <T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Generator<T> {
-    pub fn new(
-        entries: HashSet<T>,
-        wrong: HashSet<T>,
-        counter: Counter,
-    ) -> Result<Self, String> {
+impl<T: DeserializeOwned + Clone + PartialEq + Eq + Hash> Generator<T> {
+    pub fn new(entries: HashSet<T>, wrong: HashSet<T>, counter: Counter) -> Result<Self, String> {
         if entries.is_empty() {
             Err("Provided empty `entries` collection!".to_string())
         } else {
@@ -78,11 +74,8 @@ mod tests {
 
     #[test]
     fn test_generator_empty_entries() {
-        let generator = Generator::<CharacterEntry>::new(
-            HashSet::new(),
-            HashSet::new(),
-            Counter::new(1)
-        );
+        let generator =
+            Generator::<CharacterEntry>::new(HashSet::new(), HashSet::new(), Counter::new(1));
         assert!(generator.is_err());
     }
 

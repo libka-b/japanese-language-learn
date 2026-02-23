@@ -1,9 +1,9 @@
-use crate::manager::{Counter, EntryCounter, Generator, JsonCompatibleStats, Stats};
-use std::collections::HashSet;
-use tauri::{path::BaseDirectory, AppHandle, Manager as TauriManager};
-use serde::{Serialize, de::DeserializeOwned};
-use std::hash::Hash;
 use crate::manager::utils::load_csv_entries;
+use crate::manager::{Counter, EntryCounter, Generator, JsonCompatibleStats, Stats};
+use serde::{de::DeserializeOwned, Serialize};
+use std::collections::HashSet;
+use std::hash::Hash;
+use tauri::{path::BaseDirectory, AppHandle, Manager as TauriManager};
 
 pub struct Manager<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> {
     resource_path: String,
@@ -12,7 +12,7 @@ pub struct Manager<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Ha
     entry_generator: Option<Generator<T>>,
 }
 
-impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T> {
+impl<T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T> {
     pub fn new(resource_path: String, stats_path: String) -> Self {
         Self {
             resource_path,
@@ -98,7 +98,10 @@ impl <T: DeserializeOwned + Serialize + Clone + PartialEq + Eq + Hash> Manager<T
 
 // stop_at is computed as half of the total entries + % of mistakes done * total entries
 // that means, the worst case scenario (100% mistakes) it will end up being 1.5 times the total entries
-fn compute_stop_at<T: DeserializeOwned + Clone + PartialEq + Eq + Hash>(entries_len: u32, stats: Stats<T>) -> u32 {
+fn compute_stop_at<T: DeserializeOwned + Clone + PartialEq + Eq + Hash>(
+    entries_len: u32,
+    stats: Stats<T>,
+) -> u32 {
     let base = entries_len as f32 / 2.0;
     let extra = match stats.total {
         0 => 0.0,
@@ -110,8 +113,8 @@ fn compute_stop_at<T: DeserializeOwned + Clone + PartialEq + Eq + Hash>(entries_
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
     use crate::manager::CharacterEntry;
+    use std::collections::HashMap;
 
     #[test]
     fn test_compute_stop_at_empty_stats() {

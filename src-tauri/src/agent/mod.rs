@@ -5,6 +5,6 @@ mod request;
 mod response;
 mod types;
 
-pub use types::{LessonData, Translation};
-pub use lesson::{generate_lesson, validate_translation};
 pub use api_key::{ApiKey, ApiKeyError};
+pub use lesson::{generate_lesson, validate_translation};
+pub use types::{LessonData, Translation};

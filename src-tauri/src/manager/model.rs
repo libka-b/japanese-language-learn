@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use crate::manager::Counter;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]

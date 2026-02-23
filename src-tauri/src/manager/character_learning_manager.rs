@@ -1,10 +1,10 @@
-use serde::{Deserialize, Serialize};
-use tauri::AppHandle;
+use crate::manager::config::CharacterLearningLessonConfig;
+use crate::manager::model::CharacterEntryRow;
 use crate::manager::utils::load_csv_entries;
 use crate::manager::{CharacterEntry, CharacterEntryTable};
-use crate::manager::model::CharacterEntryRow;
-use crate::manager::config::CharacterLearningLessonConfig;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use tauri::AppHandle;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct EntryRow {
@@ -46,19 +46,20 @@ impl CharacterLearningManager {
             handle,
         );
 
-        let character_entry_rows: Vec<CharacterEntryRow> = character_rows.into_iter()
-            .map(|row| {
-                CharacterEntryRow {
-                    col1: character_map.get(&row.col1).cloned(),
-                    col2: character_map.get(&row.col2).cloned(),
-                    col3: character_map.get(&row.col3).cloned(),
-                    col4: character_map.get(&row.col4).cloned(),
-                    col5: character_map.get(&row.col5).cloned(),
-                }
+        let character_entry_rows: Vec<CharacterEntryRow> = character_rows
+            .into_iter()
+            .map(|row| CharacterEntryRow {
+                col1: character_map.get(&row.col1).cloned(),
+                col2: character_map.get(&row.col2).cloned(),
+                col3: character_map.get(&row.col3).cloned(),
+                col4: character_map.get(&row.col4).cloned(),
+                col5: character_map.get(&row.col5).cloned(),
             })
             .collect();
 
-        self.character_entry_table = Some(CharacterEntryTable { rows: character_entry_rows });
+        self.character_entry_table = Some(CharacterEntryTable {
+            rows: character_entry_rows,
+        });
     }
 
     fn load_character_map(&self, handle: AppHandle) -> HashMap<String, CharacterEntry> {
@@ -67,7 +68,8 @@ impl CharacterLearningManager {
             handle,
         );
 
-        character_entries.into_iter()
+        character_entries
+            .into_iter()
             .map(|entry| (entry.japanese.clone(), entry))
             .collect()
     }

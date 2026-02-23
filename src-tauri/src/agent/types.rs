@@ -1,5 +1,5 @@
-use serde_json::{Map, Value};
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
 pub trait GeminiSchema {
     fn get_gemini_schema() -> Map<String, Value>;
@@ -23,14 +23,14 @@ impl GeminiSchema for LessonData {
                 "type": "string",
                 "description": "Difficulty level"
             }
-        }).as_object().unwrap().clone()
+        })
+        .as_object()
+        .unwrap()
+        .clone()
     }
 
     fn get_gemini_required() -> Vec<String> {
-        vec![
-            "japanese_text".to_string(),
-            "difficulty".to_string(),
-        ]
+        vec!["japanese_text".to_string(), "difficulty".to_string()]
     }
 }
 
@@ -75,13 +75,13 @@ impl GeminiSchema for Translation {
     }
 
     fn get_gemini_required() -> Vec<String> {
-        vec!(
+        vec![
             "original_text".to_string(),
             "translation".to_string(),
             "correction".to_string(),
             "mistakes".to_string(),
             "suggestions".to_string(),
             "mark".to_string(),
-        )
+        ]
     }
 }
